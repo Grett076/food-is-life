@@ -68,4 +68,15 @@ export const INGREDIENTS: Ingredient[] = [
   { id: 'stock-beef',       name: 'Runderbouillon' },
   { id: 'dried-pasta',      name: 'Gedroogde pasta' },
   { id: 'canned-tomato',    name: 'Gepelde tomaten (blik)' },
+
+  // Fruit
+  { id: 'mango',            name: 'Mango', seasonStartMonth: 3, seasonEndMonth: 9, peakMonths: [5, 6, 7] },
+  { id: 'grape',            name: 'Druiven', seasonStartMonth: 8, seasonEndMonth: 11, peakMonths: [9, 10] },
+  { id: 'blueberry',        name: 'Blauwe bessen', seasonStartMonth: 6, seasonEndMonth: 8, peakMonths: [7] },
+  { id: 'kiwi',             name: 'Kiwi (geel)' }, // het hele jaar beschikbaar
+  { id: 'banana',           name: 'Banaan' },
+  { id: 'orange',           name: 'Sinaasappel', seasonStartMonth: 11, seasonEndMonth: 4, peakMonths: [12, 1, 2] },
+  { id: 'melon',            name: 'Meloen', seasonStartMonth: 6, seasonEndMonth: 9, peakMonths: [7, 8] },
+  { id: 'cucumber',         name: 'Komkommer', seasonStartMonth: 5, seasonEndMonth: 9, peakMonths: [6, 7, 8] },
+  { id: 'ham',              name: 'Ham' },
 ];

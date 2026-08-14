@@ -35,9 +35,11 @@ interface Props {
   onAddToStock: (ids: string[]) => void;
   onCookMeal: (ingredientIds: string[]) => void;
   onAddRecipe: (recipe: Recipe) => void;
+  onSetLunch: (date: string, value: 'boterham' | 'skip' | null) => void;
+  onSetTedSchool: (date: string, value: boolean) => void;
 }
 
-export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, onAssign, onNavigate, onAddToStock, onCookMeal, onAddRecipe }: Props) {
+export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, onAssign, onNavigate, onAddToStock, onCookMeal, onAddRecipe, onSetLunch, onSetTedSchool }: Props) {
   const [picking, setPicking] = useState<string | null>(null); // date
   const [detail, setDetail] = useState<Recipe | null>(null);
   const [showShopping, setShowShopping] = useState(false);
@@ -130,6 +132,36 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                 <div className="day-meal">{day.note}</div>
               ) : (
                 <div className="day-meal empty">Nog niets gepland</div>
+              )}
+
+              {/* Lunch + Ted — alleen op werkdagen */}
+              {day.lunch !== undefined && day.lunch !== null && (
+                <div style={{ display: 'flex', gap: '.35rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <button
+                    onClick={() => onSetLunch(day.date, day.lunch === 'boterham' ? 'skip' : 'boterham')}
+                    title={day.lunch === 'boterham' ? 'Klik om over te slaan' : 'Klik voor boterham'}
+                    style={{
+                      fontSize: '.72rem', padding: '.15rem .45rem', borderRadius: 4, cursor: 'pointer', border: '1px solid',
+                      background: day.lunch === 'boterham' ? '#fef9c3' : 'var(--tag-bg)',
+                      borderColor: day.lunch === 'boterham' ? '#fde68a' : 'var(--border)',
+                      color: day.lunch === 'boterham' ? '#854d0e' : 'var(--text-muted)',
+                    }}
+                  >
+                    {day.lunch === 'boterham' ? '🥪 Boterham' : '🥪 —'}
+                  </button>
+                  <button
+                    onClick={() => onSetTedSchool(day.date, !day.tedSchool)}
+                    title={day.tedSchool ? 'Ted heeft schoollunch' : 'Ted niet'}
+                    style={{
+                      fontSize: '.72rem', padding: '.15rem .45rem', borderRadius: 4, cursor: 'pointer', border: '1px solid',
+                      background: day.tedSchool ? '#dbeafe' : 'var(--tag-bg)',
+                      borderColor: day.tedSchool ? '#93c5fd' : 'var(--border)',
+                      color: day.tedSchool ? '#1e40af' : 'var(--text-muted)',
+                    }}
+                  >
+                    {day.tedSchool ? '👦 Ted' : '👦'}
+                  </button>
+                </div>
               )}
 
               <div className="day-actions">

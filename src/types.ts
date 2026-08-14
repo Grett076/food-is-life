@@ -51,7 +51,9 @@ export interface Recipe {
 export interface PlannedDay {
   date: string; // 'YYYY-MM-DD'
   recipeId: string | null;
-  note?: string; // voor boterham, restjes, etc.
+  note?: string;
+  lunch?: 'boterham' | 'skip' | null; // null = weekend / niet relevant
+  tedSchool?: boolean; // Ted heeft schoollunch nodig deze dag
 }
 
 export interface MealHistory {

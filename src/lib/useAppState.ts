@@ -3,7 +3,7 @@ import type { PlannedDay, MealHistory, Recipe, Ingredient, Preferences } from '.
 import { RECIPES } from '../data/recipes';
 import { INGREDIENTS } from '../data/ingredients';
 
-const DATA_VERSION = 10; // verhoog bij wijzigingen in seed-recepten of ingrediënten
+const DATA_VERSION = 11; // verhoog bij wijzigingen in seed-recepten of ingrediënten
 
 function getMonday(date: Date): Date {
   const d = new Date(date);
@@ -18,7 +18,12 @@ function buildWeek(monday: Date): PlannedDay[] {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
-    return { date: d.toISOString().slice(0, 10), recipeId: null };
+    const isWorkday = i < 5; // ma–vr
+    return {
+      date: d.toISOString().slice(0, 10),
+      recipeId: null,
+      lunch: isWorkday ? 'boterham' : null,
+    };
   });
 }
 
@@ -99,6 +104,14 @@ export function useAppState() {
     }
   }
 
+  function setLunch(date: string, value: 'boterham' | 'skip' | null) {
+    setWeek((w) => w.map((d) => (d.date === date ? { ...d, lunch: value } : d)));
+  }
+
+  function setTedSchool(date: string, value: boolean) {
+    setWeek((w) => w.map((d) => (d.date === date ? { ...d, tedSchool: value } : d)));
+  }
+
   function toggleFavorite(recipeId: string) {
     setRecipes((rs) =>
       rs.map((r) => (r.id === recipeId ? { ...r, favorite: !r.favorite } : r)),
@@ -177,5 +190,7 @@ export function useAppState() {
     toggleStock,
     addToStock,
     cookMeal,
+    setLunch,
+    setTedSchool,
   };
 }

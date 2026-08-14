@@ -74,6 +74,8 @@ export default function App() {
             onAddToStock={state.addToStock}
             onCookMeal={state.cookMeal}
             onAddRecipe={state.addRecipe}
+            onSetLunch={state.setLunch}
+            onSetTedSchool={state.setTedSchool}
           />
         )}
 

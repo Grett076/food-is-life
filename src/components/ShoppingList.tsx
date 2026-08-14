@@ -61,6 +61,21 @@ export function ShoppingList({ week, recipes, allIngredients, stock, onAddToStoc
   }
 
   const plannedCount = week.filter((d) => d.recipeId).length;
+  const boterhamDagen = week.filter((d) => d.lunch === 'boterham').length;
+  const tedDagen = week.filter((d) => d.tedSchool).length;
+
+  // Seizoensfruit suggestie voor Ted
+  const fruitInSeizoen = allIngredients
+    .filter((i) => ['mango','grape','blueberry','kiwi','banana','orange','strawberry','apple','pear','melon'].includes(i.id))
+    .filter((i) => {
+      if (!i.seasonStartMonth || !i.seasonEndMonth) return true; // heel jaar
+      const m = new Date().getMonth() + 1;
+      return i.seasonStartMonth <= i.seasonEndMonth
+        ? m >= i.seasonStartMonth && m <= i.seasonEndMonth
+        : m >= i.seasonStartMonth || m <= i.seasonEndMonth;
+    })
+    .slice(0, 3)
+    .map((i) => i.name);
 
   return (
     <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
@@ -149,6 +164,39 @@ export function ShoppingList({ week, recipes, allIngredients, stock, onAddToStoc
 
               {/* Niet gelinkte ingrediënten */}
               <UnlinkedNote week={week} recipes={recipes} />
+
+              {/* Jouw lunch */}
+              {boterhamDagen > 0 && (
+                <div style={{ marginTop: '1.25rem', padding: '1rem', background: '#fef9c3', borderRadius: 8, border: '1px solid #fde68a' }}>
+                  <h3 style={{ ...sectionHead, color: '#854d0e', marginBottom: '.5rem' }}>
+                    🥪 Jouw lunch — {boterhamDagen} dag{boterhamDagen !== 1 ? 'en' : ''} boterham
+                  </h3>
+                  <div style={{ fontSize: '.85rem', display: 'flex', flexDirection: 'column', gap: '.2rem' }}>
+                    <span>🍞 Brood — {boterhamDagen * 2} sneden (~{Math.ceil(boterhamDagen / 7)} brood)</span>
+                    <span>🍖 Ham — {boterhamDagen * 2} plakken</span>
+                    <span>🧀 Kaas — {boterhamDagen * 2} plakken</span>
+                    <span>🥒 Komkommer — {boterhamDagen <= 2 ? '½' : boterhamDagen <= 4 ? '1' : '1½'}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Ted's schoollunch */}
+              {tedDagen > 0 && (
+                <div style={{ marginTop: '.75rem', padding: '1rem', background: '#dbeafe', borderRadius: 8, border: '1px solid #93c5fd' }}>
+                  <h3 style={{ ...sectionHead, color: '#1e40af', marginBottom: '.5rem' }}>
+                    👦 Ted's schoollunch — {tedDagen} dag{tedDagen !== 1 ? 'en' : ''}
+                  </h3>
+                  <div style={{ fontSize: '.85rem', display: 'flex', flexDirection: 'column', gap: '.2rem' }}>
+                    <span>🍞 Extra brood — {tedDagen * 3} sneden</span>
+                    <span>🍎 Fruit — {tedDagen} portie{tedDagen !== 1 ? 's' : ''}</span>
+                    {fruitInSeizoen.length > 0 && (
+                      <span style={{ color: '#1e40af', fontSize: '.78rem' }}>
+                        Nu in seizoen: {fruitInSeizoen.join(', ')}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Acties */}
               {checked.size > 0 && (
