@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import type { Recipe, Ingredient, MealHistory } from '../types';
 import { seasonFit, SEASON_FIT_LABEL } from '../lib/season';
 import { totalTimesCooked } from '../lib/history';
+import { scaleAmount } from '../lib/scale';
 
 function formatMinutes(m: number): string {
   if (m < 60) return `${m} min`;
@@ -26,6 +28,12 @@ interface Props {
 export function RecipeDetail({ recipe, allIngredients, history, month, onEdit, onDelete, onClose }: Props) {
   const fit = seasonFit(recipe.ingredients, allIngredients, month);
   const cooked = totalTimesCooked(recipe.id, history);
+  const baseServings = recipe.servings ?? 4;
+  const [servings, setServings] = useState(baseServings);
+  const factor = servings / baseServings;
+  const hasSeasoningWarning = factor !== 1 && recipe.recipeIngredients?.some(
+    (ri) => ri.amount && /\btl\b|snuf/i.test(ri.amount),
+  );
 
   const isDivider = (name: string) => name === '---';
 
@@ -53,7 +61,6 @@ export function RecipeDetail({ recipe, allIngredients, history, month, onEdit, o
 
         <div className="modal-body recipe-detail">
 
-          {/* Meta */}
           {recipe.description && (
             <p style={{ marginBottom: '.75rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>{recipe.description}</p>
           )}
@@ -65,7 +72,8 @@ export function RecipeDetail({ recipe, allIngredients, history, month, onEdit, o
             {recipe.tags.map((t) => <span key={t} className="tag">{t}</span>)}
           </div>
 
-          <div className="times">
+          {/* Tijden + portiewisselaar */}
+          <div className="times" style={{ alignItems: 'center' }}>
             <div className="time-block">
               <span className="label">Actieve tijd</span>
               <span className="value">{formatMinutes(recipe.activePrepMinutes)}</span>
@@ -76,18 +84,34 @@ export function RecipeDetail({ recipe, allIngredients, history, month, onEdit, o
                 <span className="value">{formatMinutes(recipe.totalTimeMinutes)}</span>
               </div>
             )}
-            {recipe.servings && (
-              <div className="time-block">
-                <span className="label">Porties</span>
-                <span className="value">{recipe.servings}</span>
-              </div>
-            )}
             {cooked > 0 && (
               <div className="time-block">
                 <span className="label">Gekookt</span>
                 <span className="value">{cooked}×</span>
               </div>
             )}
+            {/* Portiewisselaar */}
+            <div className="time-block" style={{ marginLeft: 'auto' }}>
+              <span className="label">Porties</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '.4rem', marginTop: '.15rem' }}>
+                <button
+                  onClick={() => setServings((s) => Math.max(1, s - 1))}
+                  style={counterBtn}
+                >−</button>
+                <span style={{ fontWeight: 700, fontSize: '1rem', minWidth: '1.5rem', textAlign: 'center' }}>{servings}</span>
+                <button
+                  onClick={() => setServings((s) => s + 1)}
+                  style={counterBtn}
+                >+</button>
+                {factor !== 1 && (
+                  <button
+                    onClick={() => setServings(baseServings)}
+                    style={{ ...counterBtn, fontSize: '.7rem', color: 'var(--text-muted)', padding: '.2rem .4rem' }}
+                    title="Terug naar origineel"
+                  >↺</button>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Voorbereiding */}
@@ -110,24 +134,34 @@ export function RecipeDetail({ recipe, allIngredients, history, month, onEdit, o
           {/* Ingrediënten */}
           {recipe.recipeIngredients && recipe.recipeIngredients.length > 0 && (
             <div style={{ marginTop: '1.25rem' }}>
-              <h4 style={sectionHead}>Ingrediënten</h4>
+              <h4 style={sectionHead}>
+                Ingrediënten
+                {factor !== 1 && (
+                  <span style={{ marginLeft: '.5rem', fontWeight: 400, color: 'var(--accent)', fontSize: '.75rem' }}>
+                    ×{factor % 1 === 0 ? factor : factor.toFixed(2).replace(/\.?0+$/, '')} aangepast
+                  </span>
+                )}
+              </h4>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.88rem' }}>
                 <tbody>
                   {recipe.recipeIngredients.map((ing, i) => {
                     if (isDivider(ing.name)) {
-                      // sectietitel (bijv. "— saus —")
                       return (
                         <tr key={i}>
-                          <td colSpan={3} style={{ paddingTop: '.6rem', paddingBottom: '.2rem', fontWeight: 700, fontSize: '.75rem', textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--text-muted)' }}>
+                          <td colSpan={2} style={{ paddingTop: '.6rem', paddingBottom: '.2rem', fontWeight: 700, fontSize: '.75rem', textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--text-muted)' }}>
                             {(ing as any).amount || ''}
                           </td>
                         </tr>
                       );
                     }
+                    const scaled = scaleAmount(ing.amount, factor);
                     return (
                       <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                        <td style={{ padding: '.35rem .5rem .35rem 0', color: 'var(--accent)', fontWeight: 600, whiteSpace: 'nowrap', width: '30%' }}>
-                          {ing.amount || ''}
+                        <td style={{ padding: '.35rem .5rem .35rem 0', color: scaled.seasoning ? '#92400e' : 'var(--accent)', fontWeight: 600, whiteSpace: 'nowrap', width: '30%' }}>
+                          {scaled.text || ''}
+                          {scaled.seasoning && factor !== 1 && (
+                            <span title="Kleine maat — proef zelf" style={{ marginLeft: '.3rem', fontSize: '.75rem' }}>⚠</span>
+                          )}
                         </td>
                         <td style={{ padding: '.35rem .5rem' }}>
                           {ing.name}
@@ -138,6 +172,11 @@ export function RecipeDetail({ recipe, allIngredients, history, month, onEdit, o
                   })}
                 </tbody>
               </table>
+              {hasSeasoningWarning && (
+                <p style={{ fontSize: '.75rem', color: '#92400e', marginTop: '.5rem' }}>
+                  ⚠ Kleine maten (tl, snuf) zijn geschaald als richtlijn — proef zelf en pas aan.
+                </p>
+              )}
             </div>
           )}
 
@@ -160,7 +199,6 @@ export function RecipeDetail({ recipe, allIngredients, history, month, onEdit, o
             </div>
           )}
 
-          {/* Fallback: alleen ingrediënt-IDs zonder hoeveelheden */}
           {!recipe.recipeIngredients && recipe.ingredients.length > 0 && (
             <div style={{ marginTop: '1rem' }}>
               <h4 style={sectionHead}>Ingrediënten</h4>
@@ -181,4 +219,12 @@ export function RecipeDetail({ recipe, allIngredients, history, month, onEdit, o
 const sectionHead: React.CSSProperties = {
   fontSize: '.75rem', fontWeight: 700, textTransform: 'uppercase',
   letterSpacing: '.05em', color: 'var(--text-muted)', marginBottom: '.5rem',
+};
+
+const counterBtn: React.CSSProperties = {
+  width: '1.6rem', height: '1.6rem',
+  border: '1px solid var(--border)', borderRadius: 5,
+  background: 'var(--surface)', cursor: 'pointer',
+  fontSize: '1rem', lineHeight: 1, display: 'flex',
+  alignItems: 'center', justifyContent: 'center',
 };
