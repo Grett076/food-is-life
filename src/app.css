@@ -1,20 +1,20 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #faf9f7;
+  --bg: #f7f5f0;
   --surface: #ffffff;
-  --border: #e5e2db;
-  --text: #1a1a1a;
-  --text-muted: #6b6560;
-  --accent: #c2600a;
-  --accent-light: #fff3eb;
-  --weekend-bg: #f0f4ff;
-  --weekend-border: #b8c8f0;
-  --project-bg: #fdf3e7;
-  --project-border: #e8c490;
-  --tag-bg: #f0ede8;
+  --border: #d8e6dd;
+  --text: #1a2420;
+  --text-muted: #5a6b62;
+  --accent: #2d6a4f;
+  --accent-light: #e8f5ef;
+  --weekend-bg: #fef9ed;
+  --weekend-border: #e8c878;
+  --project-bg: #fff5e0;
+  --project-border: #d4a832;
+  --tag-bg: #edf2ee;
   --radius: 10px;
-  --shadow: 0 1px 3px rgba(0,0,0,.08);
+  --shadow: 0 2px 6px rgba(0,0,0,.09);
 }
 
 body {
@@ -28,14 +28,14 @@ body {
 .app { display: grid; grid-template-rows: auto 1fr; min-height: 100vh; }
 
 header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: #1a3d2b;
+  border-bottom: none;
   padding: .75rem 1.5rem;
   display: flex;
   align-items: center;
   gap: 1.5rem;
 }
-header h1 { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+header h1 { font-size: 1.1rem; font-weight: 700; color: #c8e6d4; letter-spacing: .01em; }
 nav { display: flex; gap: .25rem; }
 nav button {
   padding: .4rem .85rem;
@@ -44,10 +44,10 @@ nav button {
   background: transparent;
   cursor: pointer;
   font-size: .9rem;
-  color: var(--text-muted);
-  transition: background .15s;
+  color: #8aab95;
+  transition: background .15s, color .15s;
 }
-nav button:hover { background: var(--tag-bg); }
+nav button:hover { background: rgba(255,255,255,.1); color: #c8e6d4; }
 nav button.active { background: var(--accent); color: white; }
 
 main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
@@ -98,7 +98,7 @@ main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
   box-shadow: var(--shadow);
 }
 .day-card.weekend { background: var(--weekend-bg); border-color: var(--weekend-border); }
-.day-card.today { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+.day-card.today { border-color: var(--accent); border-width: 2px; box-shadow: 0 0 0 3px var(--accent-light); }
 
 .day-label {
   font-size: .75rem;
@@ -138,9 +138,9 @@ main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
   background: var(--tag-bg);
   color: var(--text-muted);
 }
-.season-badge.perfect { background: #d4edda; color: #155724; }
-.season-badge.good { background: #cce5ff; color: #004085; }
-.season-badge.low { background: #f8d7da; color: #721c24; }
+.season-badge.perfect { background: #c8ecd4; color: #1a5c35; font-weight: 600; }
+.season-badge.good { background: #daeee0; color: #2d6a4f; }
+.season-badge.low { background: #fde8d8; color: #8b3a1a; }
 
 /* Weekend banner */
 .weekend-banner {
@@ -211,9 +211,9 @@ main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
   cursor: pointer;
   transition: box-shadow .15s, border-color .15s;
 }
-.recipe-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); border-color: #ccc; }
-.recipe-card.weekendProject { border-left: 3px solid var(--accent); }
-.recipe-card.weekend { border-left: 3px solid var(--weekend-border); }
+.recipe-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.12); border-color: #b8cfbf; }
+.recipe-card.weekendProject { border-left: 3px solid var(--accent); background: #f9fdfb; }
+.recipe-card.weekend { border-left: 3px solid var(--weekend-border); background: #fffdf5; }
 
 .recipe-card h3 { font-size: 1rem; font-weight: 700; }
 .recipe-card p { font-size: .83rem; color: var(--text-muted); }
@@ -234,9 +234,9 @@ main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
   font-size: .72rem;
   color: var(--text-muted);
 }
-.tag.style-quick { background: #e8f5e9; color: #2e7d32; }
-.tag.style-weekend { background: var(--weekend-bg); color: #1a3c7a; }
-.tag.style-weekendProject { background: var(--accent-light); color: var(--accent); font-weight: 700; }
+.tag.style-quick { background: #daf0e4; color: #1a5c35; }
+.tag.style-weekend { background: #fef4d0; color: #7a5800; }
+.tag.style-weekendProject { background: var(--project-bg); color: #7a4f00; font-weight: 700; }
 
 .fav-btn {
   background: none;

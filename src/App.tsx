@@ -201,6 +201,6 @@ const sh: React.CSSProperties = {
 
 const headerBtn: React.CSSProperties = {
   padding: '.3rem .65rem', fontSize: '.8rem',
-  border: '1px solid var(--border)', borderRadius: 6,
-  background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)',
+  border: '1px solid rgba(255,255,255,.15)', borderRadius: 6,
+  background: 'rgba(255,255,255,.06)', cursor: 'pointer', color: '#8aab95',
 };
