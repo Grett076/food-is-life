@@ -121,6 +121,10 @@ export function useAppState() {
     setTedSchedule({ referenceWednesday: wednesday, overrides: {} });
   }
 
+  function resetTedSchedule() {
+    setTedSchedule({ referenceWednesday: null, overrides: {} });
+  }
+
   function toggleFavorite(recipeId: string) {
     setRecipes((rs) =>
       rs.map((r) => (r.id === recipeId ? { ...r, favorite: !r.favorite } : r)),
@@ -203,5 +207,6 @@ export function useAppState() {
     tedSchedule,
     overrideTed,
     setTedReference,
+    resetTedSchedule,
   };
 }

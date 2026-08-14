@@ -100,10 +100,13 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
       <div className="week-grid">
         {week.map((day, i) => {
           const isWeekend = i >= 5;
+          const isWorkday = i < 5;
           const isToday = day.date === today;
           const isPast = day.date <= today;
           const recipe = recipes.find((r) => r.id === day.recipeId);
           const fit = recipe ? seasonFit(recipe.ingredients, ingredients, month) : null;
+          // Lunch: gebruik opgeslagen waarde, of default 'boterham' voor werkdagen bij ontbrekende waarde
+          const effectiveLunch = day.lunch !== undefined ? day.lunch : (isWorkday ? 'boterham' : null);
 
           return (
             <div
@@ -137,33 +140,31 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
               )}
 
               {/* Lunch + Ted */}
-              {(day.lunch !== undefined && day.lunch !== null || tedSchedule.referenceWednesday) && (
+              {(effectiveLunch !== null || (tedSchedule.referenceWednesday && isInTedPeriod(day.date, tedSchedule))) && (
                 <div style={{ display: 'flex', gap: '.35rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                  {/* Lunch — alleen werkdagen */}
-                  {day.lunch !== undefined && day.lunch !== null && (
+                  {effectiveLunch !== null && (
                     <button
-                      onClick={() => onSetLunch(day.date, day.lunch === 'boterham' ? 'skip' : 'boterham')}
-                      title={day.lunch === 'boterham' ? 'Klik om over te slaan' : 'Klik voor boterham'}
+                      onClick={() => onSetLunch(day.date, effectiveLunch === 'boterham' ? 'skip' : 'boterham')}
+                      title={effectiveLunch === 'boterham' ? 'Klik om over te slaan' : 'Klik voor boterham'}
                       style={{
                         fontSize: '.72rem', padding: '.15rem .45rem', borderRadius: 4, cursor: 'pointer', border: '1px solid',
-                        background: day.lunch === 'boterham' ? '#fef9c3' : 'var(--tag-bg)',
-                        borderColor: day.lunch === 'boterham' ? '#fde68a' : 'var(--border)',
-                        color: day.lunch === 'boterham' ? '#854d0e' : 'var(--text-muted)',
+                        background: effectiveLunch === 'boterham' ? '#fef9c3' : 'var(--tag-bg)',
+                        borderColor: effectiveLunch === 'boterham' ? '#fde68a' : 'var(--border)',
+                        color: effectiveLunch === 'boterham' ? '#854d0e' : 'var(--text-muted)',
                       }}
                     >
-                      {day.lunch === 'boterham' ? '🥪 Boterham' : '🥪 —'}
+                      {effectiveLunch === 'boterham' ? '🥪 Boterham' : '🥪 —'}
                     </button>
                   )}
-                  {/* Ted — toon alleen als Ted er is (of override) */}
                   {tedSchedule.referenceWednesday && (() => {
                     const isTed = isTedSchoolDay(day.date, tedSchedule);
                     const inPeriod = isInTedPeriod(day.date, tedSchedule);
                     const hasOverride = day.date in tedSchedule.overrides;
-                    if (!inPeriod && !hasOverride) return null; // verberg op niet-Ted-dagen
+                    if (!inPeriod && !hasOverride) return null;
                     return (
                       <button
                         onClick={() => onOverrideTed(day.date, !isTed)}
-                        title={isTed ? 'Schoollunch Ted (klik voor uitzondering)' : 'Ted is er, geen schoollunch (klik om toe te voegen)'}
+                        title={isTed ? 'Schoollunch Ted (klik voor uitzondering)' : 'Ted is er, geen schoollunch'}
                         style={{
                           fontSize: '.72rem', padding: '.15rem .45rem', borderRadius: 4, cursor: 'pointer', border: '1px solid',
                           background: isTed ? '#dbeafe' : 'var(--tag-bg)',

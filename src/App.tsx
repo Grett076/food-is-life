@@ -113,23 +113,26 @@ export default function App() {
               {state.tedSchedule.referenceWednesday ? (
                 <div style={{ fontSize: '.88rem' }}>
                   <p style={{ marginBottom: '.5rem' }}>
-                    Schema actief — eerste aankomst: <strong>{state.tedSchedule.referenceWednesday}</strong>
+                    Schema actief — Ted arriveert elke 2 weken vanaf <strong>{state.tedSchedule.referenceWednesday}</strong>.
+                    Schoollunch: do, vr, ma, di.
                   </p>
                   <p className="text-muted" style={{ marginBottom: '.75rem', fontSize: '.8rem' }}>
-                    Ted is elke 2 weken bij jou (wo-avond t/m wo-ochtend). Schoollunch: do, vr, ma, di.
-                    Klik een dag in het weekrooster om een uitzondering te maken (vakantie, andere regeling).
+                    Klik een dag in het weekrooster om een uitzondering te maken.
                   </p>
-                  <button
-                    onClick={() => state.setTedReference(state.tedSchedule.referenceWednesday === null ? '' : '')}
-                    style={{ fontSize: '.8rem', padding: '.3rem .65rem', border: '1px solid #93c5fd', borderRadius: 5, cursor: 'pointer', background: 'white', color: '#1e40af' }}
-                  >
-                    Schema aanpassen
-                  </button>
-                  <input
-                    type="date"
-                    style={{ marginLeft: '.5rem', padding: '.3rem .5rem', border: '1px solid #93c5fd', borderRadius: 5, fontSize: '.85rem' }}
-                    onChange={(e) => e.target.value && state.setTedReference(e.target.value)}
-                  />
+                  <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '.82rem', color: 'var(--text-muted)' }}>Wijzig referentiedatum:</span>
+                    <input
+                      type="date"
+                      style={{ padding: '.3rem .5rem', border: '1px solid #93c5fd', borderRadius: 5, fontSize: '.85rem' }}
+                      onChange={(e) => e.target.value && state.setTedReference(e.target.value)}
+                    />
+                    <button
+                      onClick={state.resetTedSchedule}
+                      style={{ fontSize: '.8rem', padding: '.3rem .65rem', border: '1px solid #fca5a5', borderRadius: 5, cursor: 'pointer', background: 'white', color: '#c00' }}
+                    >
+                      Schema wissen
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div style={{ fontSize: '.88rem' }}>
