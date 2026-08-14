@@ -3,28 +3,15 @@ import { useState } from 'react';
 import { useAppState } from './lib/useAppState';
 import { WeekPlanner } from './components/WeekPlanner';
 import { RecipeLibrary } from './components/RecipeLibrary';
-import { RecipeDetail } from './components/RecipeDetail';
+import { IngredientEditor } from './components/IngredientEditor';
 import { currentSeasonLabel } from './lib/season';
-import type { Recipe } from './types';
 
-type View = 'planner' | 'library';
+type View = 'planner' | 'library' | 'ingredients';
 
 export default function App() {
   const [view, setView] = useState<View>('planner');
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const state = useAppState();
-
-  const month = new Date().getMonth() + 1; // 1–12
-  const season = currentSeasonLabel(month);
-
-  function handleNavigate(delta: number) {
-    if (delta === 0) {
-      // "Vandaag" — reset door opnieuw te laden
-      window.location.reload();
-      return;
-    }
-    state.navigateWeek(delta);
-  }
+  const month = new Date().getMonth() + 1;
 
   return (
     <div className="app">
@@ -37,9 +24,12 @@ export default function App() {
           <button className={view === 'library' ? 'active' : ''} onClick={() => setView('library')}>
             Recepten
           </button>
+          <button className={view === 'ingredients' ? 'active' : ''} onClick={() => setView('ingredients')}>
+            Ingrediënten
+          </button>
         </nav>
         <span className="text-muted" style={{ marginLeft: 'auto' }}>
-          {season}
+          {currentSeasonLabel(month)}
         </span>
       </header>
 
@@ -53,7 +43,7 @@ export default function App() {
             history={state.history}
             month={month}
             onAssign={state.assignMeal}
-            onNavigate={handleNavigate}
+            onNavigate={(delta) => delta === 0 ? state.goToCurrentWeek() : state.navigateWeek(delta)}
           />
         )}
 
@@ -65,22 +55,30 @@ export default function App() {
               ingredients={state.ingredients}
               history={state.history}
               month={month}
-              onSelect={setSelectedRecipe}
               onFavorite={state.toggleFavorite}
+              onAdd={state.addRecipe}
+              onUpdate={state.updateRecipe}
+              onDelete={state.deleteRecipe}
+            />
+          </>
+        )}
+
+        {view === 'ingredients' && (
+          <>
+            <div className="section-title">Seizoeningrediënten</div>
+            <p className="text-muted" style={{ marginBottom: '1rem' }}>
+              Pas aan wanneer iets niet klopt voor jouw regio. Wordt gebruikt voor de seizoensscore van recepten.
+            </p>
+            <IngredientEditor
+              ingredients={state.ingredients}
+              onUpdate={state.updateIngredient}
+              onAdd={state.addIngredient}
+              onClose={() => {}}
+              inline
             />
           </>
         )}
       </main>
-
-      {selectedRecipe && (
-        <RecipeDetail
-          recipe={selectedRecipe}
-          allIngredients={state.ingredients}
-          history={state.history}
-          month={month}
-          onClose={() => setSelectedRecipe(null)}
-        />
-      )}
     </div>
   );
 }

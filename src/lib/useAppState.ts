@@ -90,8 +90,27 @@ export function useAppState() {
     setRecipes((rs) => [...rs, recipe]);
   }
 
+  function updateRecipe(recipe: Recipe) {
+    setRecipes((rs) => rs.map((r) => (r.id === recipe.id ? recipe : r)));
+  }
+
+  function deleteRecipe(id: string) {
+    setRecipes((rs) => rs.filter((r) => r.id !== id));
+  }
+
   function updateIngredient(ingredient: Ingredient) {
     setIngredients((is) => is.map((i) => (i.id === ingredient.id ? ingredient : i)));
+  }
+
+  function addIngredient(ingredient: Ingredient) {
+    setIngredients((is) => [...is, ingredient]);
+  }
+
+  function goToCurrentWeek() {
+    const monday = getMonday(new Date());
+    const key = `week-${monday.toISOString().slice(0, 10)}`;
+    setWeekStart(monday);
+    setWeek(load(key, buildWeek(monday)));
   }
 
   return {
@@ -104,6 +123,10 @@ export function useAppState() {
     assignMeal,
     toggleFavorite,
     addRecipe,
+    updateRecipe,
+    deleteRecipe,
     updateIngredient,
+    addIngredient,
+    goToCurrentWeek,
   };
 }

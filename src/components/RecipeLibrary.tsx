@@ -1,16 +1,24 @@
 import { useState } from 'react';
 import type { Recipe, Ingredient, MealHistory } from '../types';
 import { RecipeCard } from './RecipeCard';
+import { RecipeForm } from './RecipeForm';
+import { RecipeDetail } from './RecipeDetail';
 import { type SeasonFilter, matchesSeasonFilter, seasonFit } from '../lib/season';
 
-const STYLE_FILTERS = ['quick', 'normal', 'weekend', 'weekendProject'] as const;
+const STYLE_FILTERS = [
+  { key: 'quick', label: 'Snel' },
+  { key: 'normal', label: 'Normaal' },
+  { key: 'weekend', label: 'Weekend' },
+  { key: 'weekendProject', label: 'Weekendproject' },
+] as const;
+
 const SEASON_FILTERS: { key: SeasonFilter; label: string }[] = [
-  { key: 'now', label: 'Nu in seizoen' },
+  { key: 'now', label: '🌱 Nu in seizoen' },
   { key: 'spring', label: 'Lente' },
   { key: 'summer', label: 'Zomer' },
   { key: 'autumn', label: 'Herfst' },
   { key: 'winter', label: 'Winter' },
-  { key: 'yearRound', label: 'Hele jaar' },
+  { key: 'yearRound', label: 'Heel jaar' },
 ];
 
 interface Props {
@@ -18,15 +26,20 @@ interface Props {
   ingredients: Ingredient[];
   history: MealHistory[];
   month: number;
-  onSelect?: (recipe: Recipe) => void;
   onFavorite: (id: string) => void;
+  onAdd: (recipe: Recipe) => void;
+  onUpdate: (recipe: Recipe) => void;
+  onDelete: (id: string) => void;
 }
 
-export function RecipeLibrary({ recipes, ingredients, history, month, onSelect, onFavorite }: Props) {
+export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite, onAdd, onUpdate, onDelete }: Props) {
   const [search, setSearch] = useState('');
   const [styleFilters, setStyleFilters] = useState<Set<string>>(new Set());
   const [seasonFilter, setSeasonFilter] = useState<SeasonFilter | null>(null);
   const [favOnly, setFavOnly] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
+  const [detailRecipe, setDetailRecipe] = useState<Recipe | null>(null);
 
   function toggleStyle(s: string) {
     setStyleFilters((prev) => {
@@ -47,12 +60,19 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onSelect, 
     return true;
   });
 
-  const STYLE_LABEL: Record<string, string> = {
-    quick: 'Snel',
-    normal: 'Normaal',
-    weekend: 'Weekend',
-    weekendProject: 'Weekendproject',
-  };
+  function handleSave(recipe: Recipe) {
+    if (editingRecipe) {
+      onUpdate(recipe);
+    } else {
+      onAdd(recipe);
+    }
+    setShowForm(false);
+    setEditingRecipe(null);
+  }
+
+  function handleDelete(id: string) {
+    if (confirm('Recept verwijderen?')) onDelete(id);
+  }
 
   return (
     <div>
@@ -69,13 +89,13 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onSelect, 
         >
           ★ Favorieten
         </button>
-        {STYLE_FILTERS.map((s) => (
+        {STYLE_FILTERS.map(({ key, label }) => (
           <button
-            key={s}
-            className={`filter-btn ${styleFilters.has(s) ? 'active' : ''}`}
-            onClick={() => toggleStyle(s)}
+            key={key}
+            className={`filter-btn ${styleFilters.has(key) ? 'active' : ''}`}
+            onClick={() => toggleStyle(key)}
           >
-            {STYLE_LABEL[s]}
+            {label}
           </button>
         ))}
         {SEASON_FILTERS.map(({ key, label }) => (
@@ -87,10 +107,18 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onSelect, 
             {label}
           </button>
         ))}
+        <button
+          onClick={() => { setEditingRecipe(null); setShowForm(true); }}
+          style={{ marginLeft: 'auto', padding: '.4rem .9rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600, fontSize: '.88rem' }}
+        >
+          + Recept
+        </button>
       </div>
+
       <p className="text-muted" style={{ marginBottom: '.75rem' }}>
-        {filtered.length} gerecht{filtered.length !== 1 ? 'en' : ''}
+        {filtered.length} van {recipes.length} gerechten
       </p>
+
       <div className="recipe-grid">
         {filtered.map((r) => (
           <RecipeCard
@@ -99,12 +127,33 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onSelect, 
             allIngredients={ingredients}
             history={history}
             month={month}
-            onClick={onSelect ? () => onSelect(r) : undefined}
+            onClick={() => setDetailRecipe(r)}
             onFavorite={() => onFavorite(r.id)}
             showHistory
           />
         ))}
       </div>
+
+      {(showForm || editingRecipe) && (
+        <RecipeForm
+          existing={editingRecipe ?? undefined}
+          allIngredients={ingredients}
+          onSave={handleSave}
+          onClose={() => { setShowForm(false); setEditingRecipe(null); }}
+        />
+      )}
+
+      {detailRecipe && (
+        <RecipeDetail
+          recipe={detailRecipe}
+          allIngredients={ingredients}
+          history={history}
+          month={month}
+          onEdit={(r) => { setDetailRecipe(null); setEditingRecipe(r); }}
+          onDelete={(id) => { setDetailRecipe(null); handleDelete(id); }}
+          onClose={() => setDetailRecipe(null)}
+        />
+      )}
     </div>
   );
 }
