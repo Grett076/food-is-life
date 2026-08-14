@@ -17,8 +17,11 @@ export function rankRecipes(
   allIngredients: Ingredient[],
   month: number,
   preferences?: Preferences,
+  stock?: string[],
 ): Recipe[] {
   const disliked = new Set(preferences?.dislikedIngredients ?? []);
+  const excluded = new Set(preferences?.excludedRecipes ?? []);
+  const inStock = new Set(stock ?? []);
   const scored = recipes.map((r) => {
     let score = 0;
     if (r.favorite) score += 2;
@@ -37,9 +40,18 @@ export function rankRecipes(
     const thisMonth = timesThisMonth(r.id, history);
     if (thisMonth >= 2) score -= 2;
 
-    // Zachte penalty voor vermeden ingrediënten
-    const hasDisliked = r.ingredients.some((id) => disliked.has(id));
-    if (hasDisliked) score -= 3;
+    // Penalty voor uitgesloten recepten
+    if (excluded.has(r.id)) score -= 4;
+
+    // Penalty voor vermeden ingrediënten (ingredient-niveau, optioneel)
+    if (r.ingredients.some((id) => disliked.has(id))) score -= 2;
+
+    // Bonus als veel ingrediënten in voorraad
+    if (inStock.size > 0 && r.ingredients.length > 0) {
+      const ratio = r.ingredients.filter((id) => inStock.has(id)).length / r.ingredients.length;
+      if (ratio >= 0.7) score += 2;
+      else if (ratio >= 0.4) score += 1;
+    }
 
     return { recipe: r, score };
   });

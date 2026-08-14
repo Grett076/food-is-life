@@ -1238,4 +1238,36 @@ export const RECIPES: Recipe[] = [
     favorite: false,
   },
 
+  {
+    id: 'parelcouscous-kip',
+    name: 'Parelcouscous met kip en tomaat',
+    description: 'Zomerse parelcouscous met gepocheerde kip, cherry tomaat, zongedroogde tomaat, kappertjes en mozzarella. Lauwwarm of koud even goed.',
+    servings: 2,
+    activePrepMinutes: 20, totalTimeMinutes: 25,
+    cookingStyle: 'quick', seasonTags: ['summer'],
+    tags: ['snel', 'zomer', 'salade', 'kip', 'italiaans'],
+    ingredients: ['pearl-couscous', 'chicken', 'cherry-tomato', 'sun-dried-tomato', 'caper', 'mozzarella', 'spring-onion', 'lemon', 'olive-oil'],
+    favorite: true,
+    recipeIngredients: [
+      { name: 'parelcouscous', amount: '150g', ingredientId: 'pearl-couscous' },
+      { name: 'kipfilet', amount: '250g', ingredientId: 'chicken', note: 'pocheren of van tevoren gegaard' },
+      { name: 'cherry tomaatjes, gehalveerd', amount: '200g', ingredientId: 'cherry-tomato' },
+      { name: 'zongedroogde tomaat, in reepjes', amount: '6–8 stuks', ingredientId: 'sun-dried-tomato' },
+      { name: 'kappertjes, uitgelekt', amount: '2 el', ingredientId: 'caper' },
+      { name: 'mozzarella, grof gescheurd', amount: '125g', ingredientId: 'mozzarella' },
+      { name: 'bosui, in ringen', amount: '4 stengels', ingredientId: 'spring-onion' },
+      { name: 'citroen, sap', amount: '1', ingredientId: 'lemon' },
+      { name: 'olijfolie extra vergine', amount: '2–3 el', ingredientId: 'olive-oil' },
+      { name: 'zout en peper', amount: 'naar smaak' },
+    ],
+    steps: [
+      { text: 'Pocheer de kipfilet: leg in een pan, zet net onder koud water, breng zachtjes aan de kook. Zodra het water pruttelt, vuur laag en 12–15 min garen. Laat afkoelen in het vocht.', durationMinutes: 15 },
+      { text: 'Kook de parelcouscous volgens de verpakking (meestal 8–10 min). Laat uitlekken en iets afkoelen.', durationMinutes: 10 },
+      { text: 'Trek de kip in reepjes met twee vorken.' },
+      { text: 'Meng couscous, kip, cherry tomaten, zongedroogde tomaat, kappertjes en bosui.' },
+      { text: 'Bekleed met mozzarella. Besprenkel met citroensap en olijfolie. Breng op smaak met zout en peper.' },
+      { text: 'Serveer lauwwarm of op kamertemperatuur. Kan prima een paar uur van tevoren gemaakt worden.' },
+    ],
+  },
+
 ];

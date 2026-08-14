@@ -31,9 +31,10 @@ interface Props {
   preferences: Preferences;
   onUpdate: (recipe: Recipe) => void;
   onDelete: (id: string) => void;
+  onToggleExcluded: (id: string) => void;
 }
 
-export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite, onAdd, onUpdate, onDelete, preferences }: Props) {
+export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite, onAdd, onUpdate, onDelete, onToggleExcluded, preferences }: Props) {
   const [search, setSearch] = useState('');
   const [styleFilters, setStyleFilters] = useState<Set<string>>(new Set());
   const [seasonFilter, setSeasonFilter] = useState<SeasonFilter | null>(null);
@@ -128,9 +129,10 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
             allIngredients={ingredients}
             history={history}
             month={month}
-            isDisliked={r.ingredients.some((id) => preferences.dislikedIngredients.includes(id))}
+            isExcluded={(preferences.excludedRecipes ?? []).includes(r.id)}
             onClick={() => setDetailRecipe(r)}
             onFavorite={() => onFavorite(r.id)}
+            onToggleExcluded={() => onToggleExcluded(r.id)}
             showHistory
           />
         ))}

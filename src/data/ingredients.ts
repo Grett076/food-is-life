@@ -53,4 +53,19 @@ export const INGREDIENTS: Ingredient[] = [
   { id: 'pasta',       name: 'Pasta' },
   { id: 'rice',        name: 'Rijst' },
   { id: 'butter',      name: 'Boter' },
+
+  // Pantry & specifiek
+  { id: 'pearl-couscous',   name: 'Parelcouscous' },
+  { id: 'cherry-tomato',    name: 'Cherry tomaatjes', seasonStartMonth: 6, seasonEndMonth: 9, peakMonths: [7, 8] },
+  { id: 'sun-dried-tomato', name: 'Zongedroogde tomaat' },
+  { id: 'caper',            name: 'Kappertjes' },
+  { id: 'mozzarella',       name: 'Mozzarella' },
+  { id: 'spring-onion',     name: 'Bosui / lenteui', seasonStartMonth: 4, seasonEndMonth: 9, peakMonths: [5, 6] },
+  { id: 'olive-oil',        name: 'Olijfolie' },
+  { id: 'chickpeas-can',    name: 'Kikkererwten (blik)' },
+  { id: 'passata',          name: 'Passata / gezeefde tomaten' },
+  { id: 'stock-chicken',    name: 'Kippenbouillon' },
+  { id: 'stock-beef',       name: 'Runderbouillon' },
+  { id: 'dried-pasta',      name: 'Gedroogde pasta' },
+  { id: 'canned-tomato',    name: 'Gepelde tomaten (blik)' },
 ];

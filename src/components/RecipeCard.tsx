@@ -22,13 +22,14 @@ interface Props {
   allIngredients: Ingredient[];
   history: MealHistory[];
   month: number;
-  isDisliked?: boolean;
+  isExcluded?: boolean;
   onClick?: () => void;
   onFavorite?: () => void;
+  onToggleExcluded?: () => void;
   showHistory?: boolean;
 }
 
-export function RecipeCard({ recipe, allIngredients, history, month, isDisliked, onClick, onFavorite, showHistory }: Props) {
+export function RecipeCard({ recipe, allIngredients, history, month, isExcluded, onClick, onFavorite, onToggleExcluded, showHistory }: Props) {
   const fit = seasonFit(recipe.ingredients, allIngredients, month);
   const cooked = showHistory ? totalTimesCooked(recipe.id, history) : null;
   const days = showHistory ? daysSinceCooked(recipe.id, history) : null;
@@ -36,7 +37,17 @@ export function RecipeCard({ recipe, allIngredients, history, month, isDisliked,
   return (
     <div className={`recipe-card ${recipe.cookingStyle}`} onClick={onClick}>
       <div className="flex gap-sm" style={{ alignItems: 'flex-start' }}>
-        <h3 style={{ flex: 1 }}>{recipe.name}</h3>
+        <h3 style={{ flex: 1, opacity: isExcluded ? .45 : 1 }}>{recipe.name}</h3>
+        {onToggleExcluded && (
+          <button
+            className="fav-btn"
+            title={isExcluded ? 'Toch weer tonen' : 'Niet mijn ding'}
+            onClick={(e) => { e.stopPropagation(); onToggleExcluded(); }}
+            style={{ fontSize: '.9rem', opacity: isExcluded ? 1 : .3 }}
+          >
+            🚫
+          </button>
+        )}
         {onFavorite && (
           <button
             className="fav-btn"
@@ -60,7 +71,7 @@ export function RecipeCard({ recipe, allIngredients, history, month, isDisliked,
         {recipe.tags.slice(0, 3).map((t) => (
           <span key={t} className="tag">{t}</span>
         ))}
-        {isDisliked && <span className="tag" style={{ background: '#fee2e2', color: '#991b1b' }}>vermijd</span>}
+        {isExcluded && <span className="tag" style={{ background: '#fee2e2', color: '#991b1b' }}>niet mijn ding</span>}
       </div>
       {showHistory && (cooked !== null && cooked > 0) && (
         <div className="text-muted">

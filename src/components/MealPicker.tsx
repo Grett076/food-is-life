@@ -20,15 +20,16 @@ interface Props {
   month: number;
   currentRecipeId: string | null;
   preferences: Preferences;
+  stock: string[];
   onPick: (recipeId: string | null, note?: string) => void;
   onClose: () => void;
 }
 
-export function MealPicker({ date, isWeekend, recipes, ingredients, history, month, currentRecipeId, preferences, onPick, onClose }: Props) {
+export function MealPicker({ date, isWeekend, recipes, ingredients, history, month, currentRecipeId, preferences, stock, onPick, onClose }: Props) {
   const [note, setNote] = useState('');
   const [search, setSearch] = useState('');
 
-  const ranked = rankRecipes(recipes, history, ingredients, month, preferences);
+  const ranked = rankRecipes(recipes, history, ingredients, month, preferences, stock);
 
   const weekendProjects = recipes.filter((r) => r.cookingStyle === 'weekendProject');
   const weekendRec = recipes.filter((r) => r.cookingStyle === 'weekend');

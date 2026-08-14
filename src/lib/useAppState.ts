@@ -50,7 +50,10 @@ export function useAppState() {
     load('history', []),
   );
   const [preferences, setPreferences] = useState<Preferences>(() =>
-    load('preferences', { dislikedIngredients: ['pork', 'pumpkin'] }),
+    load('preferences', { dislikedIngredients: [], excludedRecipes: [] }),
+  );
+  const [stock, setStock] = useState<string[]>(() =>
+    load('stock', []),
   );
 
   // Persist
@@ -62,6 +65,7 @@ export function useAppState() {
   }, [week, weekStart]);
   useEffect(() => { save('history', history); }, [history]);
   useEffect(() => { save('preferences', preferences); }, [preferences]);
+  useEffect(() => { save('stock', stock); }, [stock]);
 
   function navigateWeek(delta: number) {
     const next = new Date(weekStart);
@@ -118,6 +122,26 @@ export function useAppState() {
     });
   }
 
+  function toggleExcluded(recipeId: string) {
+    setPreferences((p) => {
+      const set = new Set(p.excludedRecipes ?? []);
+      set.has(recipeId) ? set.delete(recipeId) : set.add(recipeId);
+      return { ...p, excludedRecipes: Array.from(set) };
+    });
+  }
+
+  function toggleStock(ingredientId: string) {
+    setStock((s) => {
+      const set = new Set(s);
+      set.has(ingredientId) ? set.delete(ingredientId) : set.add(ingredientId);
+      return Array.from(set);
+    });
+  }
+
+  function addToStock(ingredientIds: string[]) {
+    setStock((s) => Array.from(new Set([...s, ...ingredientIds])));
+  }
+
   function goToCurrentWeek() {
     const monday = getMonday(new Date());
     const key = `week-${monday.toISOString().slice(0, 10)}`;
@@ -142,5 +166,9 @@ export function useAppState() {
     goToCurrentWeek,
     preferences,
     toggleDisliked,
+    toggleExcluded,
+    stock,
+    toggleStock,
+    addToStock,
   };
 }

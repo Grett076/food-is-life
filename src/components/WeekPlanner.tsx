@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { PlannedDay, Recipe, Ingredient, MealHistory, Preferences } from '../types';
 import { MealPicker } from './MealPicker';
 import { RecipeDetail } from './RecipeDetail';
+import { ShoppingList } from './ShoppingList';
 import { seasonFit, SEASON_FIT_LABEL } from '../lib/season';
 
 const DAY_NL = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
@@ -27,13 +28,16 @@ interface Props {
   history: MealHistory[];
   month: number;
   preferences: Preferences;
+  stock: string[];
   onAssign: (date: string, recipeId: string | null, note?: string) => void;
   onNavigate: (delta: number) => void;
+  onAddToStock: (ids: string[]) => void;
 }
 
-export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, onAssign, onNavigate }: Props) {
+export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, onAssign, onNavigate, onAddToStock }: Props) {
   const [picking, setPicking] = useState<string | null>(null); // date
   const [detail, setDetail] = useState<Recipe | null>(null);
+  const [showShopping, setShowShopping] = useState(false);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -56,6 +60,12 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
         <h2>{isoToDisplay(weekStart.toISOString().slice(0, 10))} – {weekEndStr}</h2>
         <button onClick={() => onNavigate(1)}>Volgende →</button>
         <button onClick={() => onNavigate(0)}>Vandaag</button>
+        <button
+          onClick={() => setShowShopping(true)}
+          style={{ marginLeft: 'auto', padding: '.35rem .8rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '.85rem' }}
+        >
+          🛒 Boodschappenlijst
+        </button>
       </div>
 
       {/* Prep-taken banner voor weekendprojecten */}
@@ -136,6 +146,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
           month={month}
           currentRecipeId={week.find((d) => d.date === picking)?.recipeId ?? null}
           preferences={preferences}
+          stock={stock}
           onPick={(recipeId, note) => {
             onAssign(picking, recipeId, note);
             setPicking(null);
@@ -151,6 +162,17 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
           history={history}
           month={month}
           onClose={() => setDetail(null)}
+        />
+      )}
+
+      {showShopping && (
+        <ShoppingList
+          week={week}
+          recipes={recipes}
+          allIngredients={ingredients}
+          stock={stock}
+          onAddToStock={onAddToStock}
+          onClose={() => setShowShopping(false)}
         />
       )}
     </div>
