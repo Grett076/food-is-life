@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Recipe, Ingredient, MealHistory, Preferences } from '../types';
-import { seasonFit, SEASON_FIT_LABEL } from '../lib/season';
+import { seasonFit } from '../lib/season';
 import { rankRecipes } from '../lib/suggestions';
 import { daysSinceCooked } from '../lib/history';
 import { RecipeForm } from './RecipeForm';
@@ -28,42 +28,52 @@ interface Props {
 }
 
 export function MealPicker({ date, isWeekend, recipes, ingredients, history, month, currentRecipeId, preferences, stock, onPick, onAddRecipe, onClose }: Props) {
-  const [note, setNote] = useState('');
   const [search, setSearch] = useState('');
+  const [showNote, setShowNote] = useState(false);
+  const [note, setNote] = useState('');
   const [showForm, setShowForm] = useState(false);
 
   const ranked = rankRecipes(recipes, history, ingredients, month, preferences, stock);
-
-  const weekendProjects = recipes.filter((r) => r.cookingStyle === 'weekendProject');
-  const weekendRec = recipes.filter((r) => r.cookingStyle === 'weekend');
-  const favorites = recipes.filter((r) => r.favorite);
+  const excluded = new Set(preferences.excludedRecipes ?? []);
 
   const searchFiltered = search
     ? ranked.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()))
     : ranked;
 
+  // Weekend suggesties — compacte chips, niet volledige lijsten
+  const weekendChips = !search && isWeekend
+    ? ranked.filter((r) => r.cookingStyle === 'weekendProject' || r.cookingStyle === 'weekend' || r.favorite).slice(0, 8)
+    : [];
+
   function PickerItem({ recipe }: { recipe: Recipe }) {
     const fit = seasonFit(recipe.ingredients, ingredients, month);
     const days = daysSinceCooked(recipe.id, history);
-    const isExcluded = (preferences.excludedRecipes ?? []).includes(recipe.id);
+    const isExcluded = excluded.has(recipe.id);
+    const isCurrent = recipe.id === currentRecipeId;
+    const recentlyEaten = days !== null && days < 7;
+
     return (
       <div
-        className={`picker-item ${recipe.id === currentRecipeId ? 'active' : ''}`}
-        style={recipe.id === currentRecipeId ? { background: 'var(--accent-light)', borderColor: 'var(--accent)' } : {}}
+        className="picker-item"
         onClick={() => onPick(recipe.id)}
+        style={{
+          opacity: isExcluded ? .5 : 1,
+          background: isCurrent ? 'var(--accent-light)' : undefined,
+          borderColor: isCurrent ? 'var(--accent)' : undefined,
+        }}
       >
-        {recipe.favorite && <span title="Favoriet">★</span>}
-        <span className="name">{recipe.name}</span>
-        <span className="meta">
-          {formatMinutes(recipe.activePrepMinutes)}
-          {recipe.totalTimeMinutes !== recipe.activePrepMinutes && ` / ${formatMinutes(recipe.totalTimeMinutes)}`}
+        {/* Naam + favoriet */}
+        <span className="name" style={{ color: recentlyEaten ? 'var(--text-muted)' : 'var(--text)' }}>
+          {recipe.favorite && <span style={{ color: 'var(--accent)', marginRight: '.3rem', fontSize: '.85rem' }}>♥</span>}
+          {recipe.name}
         </span>
-        <span className={`season-badge ${fit}`} style={{ fontSize: '.7rem' }}>{SEASON_FIT_LABEL[fit]}</span>
-        {days !== null && days < 7 && (
-          <span className="meta" style={{ color: '#c00' }}>recent</span>
-        )}
-        {isExcluded && (
-          <span className="meta" title="Niet mijn ding">🚫</span>
+
+        {/* Tijd */}
+        <span className="meta">{formatMinutes(recipe.activePrepMinutes)}</span>
+
+        {/* Seizoen dot — alleen als perfect */}
+        {fit === 'perfect' && (
+          <span title="Perfect voor dit seizoen" style={{ width: 7, height: 7, borderRadius: '50%', background: '#2d6a4f', display: 'inline-block', flexShrink: 0 }} />
         )}
       </div>
     );
@@ -74,90 +84,108 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
       {showForm && (
         <RecipeForm
           allIngredients={ingredients}
-          onSave={(recipe) => {
-            onAddRecipe(recipe);
-            onPick(recipe.id);
-            onClose();
-          }}
+          onSave={(recipe) => { onAddRecipe(recipe); onPick(recipe.id); onClose(); }}
           onClose={() => setShowForm(false)}
         />
       )}
+
       <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal">
-        <div className="modal-header">
-          <h2>Maaltijd kiezen — {date}</h2>
-          <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
-            <button
-              onClick={() => setShowForm(true)}
-              style={{ fontSize: '.8rem', padding: '.3rem .65rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 5, cursor: 'pointer' }}
-            >
-              + Recept
-            </button>
-            <button className="modal-close" onClick={onClose}>×</button>
-          </div>
-        </div>
-        <div className="modal-body">
+        <div className="modal">
 
-          {/* Notitie (restjes, afhalen, etc.) */}
-          <div className="picker-note-row">
-            <input
-              type="text"
-              placeholder="Notitie: restjes, afhalen, broodjes…"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
-            <button onClick={() => { onPick(null, note); onClose(); }}>Opslaan</button>
-          </div>
-
-          {/* Weekend suggesties */}
-          {isWeekend && !search && (
-            <div className="picker-section">
-              <h3>🍳 Zin om uitgebreider te koken?</h3>
-              {weekendProjects.length > 0 && (
-                <>
-                  <p className="text-muted" style={{ marginBottom: '.5rem' }}>Weekendprojecten</p>
-                  <div className="picker-list">
-                    {weekendProjects.map((r) => <PickerItem key={r.id} recipe={r} />)}
-                  </div>
-                </>
-              )}
-              {weekendRec.length > 0 && (
-                <>
-                  <p className="text-muted" style={{ marginTop: '.75rem', marginBottom: '.5rem' }}>Weekendgerechten</p>
-                  <div className="picker-list">
-                    {weekendRec.map((r) => <PickerItem key={r.id} recipe={r} />)}
-                  </div>
-                </>
-              )}
-              {favorites.length > 0 && (
-                <>
-                  <p className="text-muted" style={{ marginTop: '.75rem', marginBottom: '.5rem' }}>Favorieten</p>
-                  <div className="picker-list">
-                    {favorites.map((r) => <PickerItem key={r.id} recipe={r} />)}
-                  </div>
-                </>
-              )}
+          {/* Header */}
+          <div className="modal-header">
+            <h2 style={{ fontSize: '.95rem' }}>Maaltijd — {date}</h2>
+            <div style={{ display: 'flex', gap: '.4rem', alignItems: 'center' }}>
+              <button onClick={() => setShowForm(true)}
+                style={{ fontSize: '.78rem', padding: '.25rem .55rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 5, cursor: 'pointer' }}>
+                + Recept
+              </button>
+              <button className="modal-close" onClick={onClose}>×</button>
             </div>
-          )}
+          </div>
 
-          {/* Zoeken + alle gerechten */}
-          <div className="picker-section">
-            <h3>Alle gerechten</h3>
+          <div className="modal-body" style={{ paddingTop: '.85rem' }}>
+
+            {/* Zoeken — prominent, bovenaan */}
             <input
               type="search"
-              placeholder="Zoeken…"
+              placeholder="Zoek een gerecht…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ width: '100%', marginBottom: '.75rem', padding: '.4rem .7rem', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '.9rem' }}
+              autoFocus
+              style={{
+                width: '100%', padding: '.55rem .85rem',
+                border: '1px solid var(--border)', borderRadius: 8,
+                fontSize: '.95rem', marginBottom: '1rem',
+                background: 'var(--bg)',
+              }}
             />
+
+            {/* Weekend chips — alleen als geen zoekopdracht */}
+            {weekendChips.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <p style={{ fontSize: '.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--text-muted)', marginBottom: '.45rem' }}>
+                  🍳 Zin in uitgebreider?
+                </p>
+                <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap' }}>
+                  {weekendChips.map((r) => (
+                    <button
+                      key={r.id}
+                      onClick={() => onPick(r.id)}
+                      style={{
+                        padding: '.3rem .7rem', borderRadius: 20,
+                        border: '1px solid var(--weekend-border)',
+                        background: r.cookingStyle === 'weekendProject' ? 'var(--project-bg)' : 'var(--weekend-bg)',
+                        cursor: 'pointer', fontSize: '.82rem', color: 'var(--text)',
+                        fontWeight: r.favorite ? 600 : 400,
+                      }}
+                    >
+                      {r.favorite && '♥ '}{r.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Gerechtenlijst */}
             <div className="picker-list">
               {searchFiltered.map((r) => <PickerItem key={r.id} recipe={r} />)}
             </div>
-          </div>
 
+            {/* Notitie — onderaan, ingeklapt */}
+            <div style={{ marginTop: '.85rem', paddingTop: '.75rem', borderTop: '1px solid var(--border)' }}>
+              {!showNote ? (
+                <button
+                  onClick={() => setShowNote(true)}
+                  style={{ fontSize: '.82rem', color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                >
+                  + Notitie toevoegen (restjes, afhalen, broodjes…)
+                </button>
+              ) : (
+                <div style={{ display: 'flex', gap: '.5rem' }}>
+                  <input
+                    type="text"
+                    placeholder="Restjes, afhalen, broodjes…"
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    autoFocus
+                    style={{ flex: 1, padding: '.4rem .65rem', border: '1px solid var(--border)', borderRadius: 6, fontSize: '.9rem' }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && note) { onPick(null, note); onClose(); } }}
+                  />
+                  <button
+                    onClick={() => { if (note) { onPick(null, note); onClose(); } }}
+                    disabled={!note}
+                    style={{ padding: '.4rem .85rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '.9rem' }}
+                  >
+                    Opslaan
+                  </button>
+                </div>
+              )}
+            </div>
+
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 }
