@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import type { PlannedDay, Recipe, Ingredient, MealHistory, Preferences } from '../types';
+import type { PlannedDay, Recipe, Ingredient, MealHistory, Preferences, TedSchedule } from '../types';
 import { MealPicker } from './MealPicker';
 import { RecipeDetail } from './RecipeDetail';
 import { CookedModal } from './CookedModal';
 import { ShoppingList } from './ShoppingList';
 import { seasonFit, SEASON_FIT_LABEL } from '../lib/season';
+import { isTedSchoolDay } from '../lib/ted';
 
 const DAY_NL = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
 const DAY_FULL = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
@@ -30,16 +31,17 @@ interface Props {
   month: number;
   preferences: Preferences;
   stock: string[];
+  tedSchedule: TedSchedule;
   onAssign: (date: string, recipeId: string | null, note?: string) => void;
   onNavigate: (delta: number) => void;
   onAddToStock: (ids: string[]) => void;
   onCookMeal: (ingredientIds: string[]) => void;
   onAddRecipe: (recipe: Recipe) => void;
   onSetLunch: (date: string, value: 'boterham' | 'skip' | null) => void;
-  onSetTedSchool: (date: string, value: boolean) => void;
+  onOverrideTed: (date: string, value: boolean) => void;
 }
 
-export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, onAssign, onNavigate, onAddToStock, onCookMeal, onAddRecipe, onSetLunch, onSetTedSchool }: Props) {
+export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, tedSchedule, onAssign, onNavigate, onAddToStock, onCookMeal, onAddRecipe, onSetLunch, onOverrideTed }: Props) {
   const [picking, setPicking] = useState<string | null>(null); // date
   const [detail, setDetail] = useState<Recipe | null>(null);
   const [showShopping, setShowShopping] = useState(false);
@@ -134,33 +136,42 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                 <div className="day-meal empty">Nog niets gepland</div>
               )}
 
-              {/* Lunch + Ted — alleen op werkdagen */}
-              {day.lunch !== undefined && day.lunch !== null && (
+              {/* Lunch + Ted */}
+              {(day.lunch !== undefined && day.lunch !== null || tedSchedule.referenceWednesday) && (
                 <div style={{ display: 'flex', gap: '.35rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                  <button
-                    onClick={() => onSetLunch(day.date, day.lunch === 'boterham' ? 'skip' : 'boterham')}
-                    title={day.lunch === 'boterham' ? 'Klik om over te slaan' : 'Klik voor boterham'}
-                    style={{
-                      fontSize: '.72rem', padding: '.15rem .45rem', borderRadius: 4, cursor: 'pointer', border: '1px solid',
-                      background: day.lunch === 'boterham' ? '#fef9c3' : 'var(--tag-bg)',
-                      borderColor: day.lunch === 'boterham' ? '#fde68a' : 'var(--border)',
-                      color: day.lunch === 'boterham' ? '#854d0e' : 'var(--text-muted)',
-                    }}
-                  >
-                    {day.lunch === 'boterham' ? '🥪 Boterham' : '🥪 —'}
-                  </button>
-                  <button
-                    onClick={() => onSetTedSchool(day.date, !day.tedSchool)}
-                    title={day.tedSchool ? 'Ted heeft schoollunch' : 'Ted niet'}
-                    style={{
-                      fontSize: '.72rem', padding: '.15rem .45rem', borderRadius: 4, cursor: 'pointer', border: '1px solid',
-                      background: day.tedSchool ? '#dbeafe' : 'var(--tag-bg)',
-                      borderColor: day.tedSchool ? '#93c5fd' : 'var(--border)',
-                      color: day.tedSchool ? '#1e40af' : 'var(--text-muted)',
-                    }}
-                  >
-                    {day.tedSchool ? '👦 Ted' : '👦'}
-                  </button>
+                  {/* Lunch — alleen werkdagen */}
+                  {day.lunch !== undefined && day.lunch !== null && (
+                    <button
+                      onClick={() => onSetLunch(day.date, day.lunch === 'boterham' ? 'skip' : 'boterham')}
+                      title={day.lunch === 'boterham' ? 'Klik om over te slaan' : 'Klik voor boterham'}
+                      style={{
+                        fontSize: '.72rem', padding: '.15rem .45rem', borderRadius: 4, cursor: 'pointer', border: '1px solid',
+                        background: day.lunch === 'boterham' ? '#fef9c3' : 'var(--tag-bg)',
+                        borderColor: day.lunch === 'boterham' ? '#fde68a' : 'var(--border)',
+                        color: day.lunch === 'boterham' ? '#854d0e' : 'var(--text-muted)',
+                      }}
+                    >
+                      {day.lunch === 'boterham' ? '🥪 Boterham' : '🥪 —'}
+                    </button>
+                  )}
+                  {/* Ted — altijd zichtbaar als schema bekend */}
+                  {tedSchedule.referenceWednesday && (() => {
+                    const isTed = isTedSchoolDay(day.date, tedSchedule);
+                    return (
+                      <button
+                        onClick={() => onOverrideTed(day.date, !isTed)}
+                        title={isTed ? 'Ted heeft schoollunch (klik voor uitzondering)' : 'Ted niet (klik om toe te voegen)'}
+                        style={{
+                          fontSize: '.72rem', padding: '.15rem .45rem', borderRadius: 4, cursor: 'pointer', border: '1px solid',
+                          background: isTed ? '#dbeafe' : 'var(--tag-bg)',
+                          borderColor: isTed ? '#93c5fd' : 'var(--border)',
+                          color: isTed ? '#1e40af' : 'var(--text-muted)',
+                        }}
+                      >
+                        {isTed ? '👦 Ted' : '👦'}
+                      </button>
+                    );
+                  })()}
                 </div>
               )}
 
@@ -226,6 +237,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
           recipes={recipes}
           allIngredients={ingredients}
           stock={stock}
+          tedSchedule={tedSchedule}
           onAddToStock={onAddToStock}
           onClose={() => setShowShopping(false)}
         />

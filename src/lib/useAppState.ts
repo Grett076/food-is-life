@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { PlannedDay, MealHistory, Recipe, Ingredient, Preferences } from '../types';
+import type { PlannedDay, MealHistory, Recipe, Ingredient, Preferences, TedSchedule } from '../types';
 import { RECIPES } from '../data/recipes';
 import { INGREDIENTS } from '../data/ingredients';
 
@@ -71,6 +71,9 @@ export function useAppState() {
   const [stock, setStock] = useState<string[]>(() =>
     load('stock', []),
   );
+  const [tedSchedule, setTedSchedule] = useState<TedSchedule>(() =>
+    load('tedSchedule', { referenceWednesday: null, overrides: {} }),
+  );
 
   // Persist
   useEffect(() => { save('recipes', recipes); }, [recipes]);
@@ -82,6 +85,7 @@ export function useAppState() {
   useEffect(() => { save('history', history); }, [history]);
   useEffect(() => { save('preferences', preferences); }, [preferences]);
   useEffect(() => { save('stock', stock); }, [stock]);
+  useEffect(() => { save('tedSchedule', tedSchedule); }, [tedSchedule]);
 
   function navigateWeek(delta: number) {
     const next = new Date(weekStart);
@@ -108,8 +112,13 @@ export function useAppState() {
     setWeek((w) => w.map((d) => (d.date === date ? { ...d, lunch: value } : d)));
   }
 
-  function setTedSchool(date: string, value: boolean) {
-    setWeek((w) => w.map((d) => (d.date === date ? { ...d, tedSchool: value } : d)));
+  function overrideTed(date: string, value: boolean) {
+    // Handmatige override op het Ted-schema voor één dag
+    setTedSchedule((s) => ({ ...s, overrides: { ...s.overrides, [date]: value } }));
+  }
+
+  function setTedReference(wednesday: string) {
+    setTedSchedule({ referenceWednesday: wednesday, overrides: {} });
   }
 
   function toggleFavorite(recipeId: string) {
@@ -191,6 +200,8 @@ export function useAppState() {
     addToStock,
     cookMeal,
     setLunch,
-    setTedSchool,
+    tedSchedule,
+    overrideTed,
+    setTedReference,
   };
 }

@@ -61,6 +61,13 @@ export interface MealHistory {
   date: string; // 'YYYY-MM-DD'
 }
 
+export interface TedSchedule {
+  /** De woensdag waarop Ted voor het eerst arriveert (ISO datum) */
+  referenceWednesday: string | null;
+  /** Datums waarop de automatische berekening is overschreven */
+  overrides: Record<string, boolean>; // datum -> tedSchool aan/uit
+}
+
 export interface Preferences {
   excludedRecipes: string[]; // per recept: niet mijn ding
 }

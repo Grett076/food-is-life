@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import type { PlannedDay, Recipe, Ingredient } from '../types';
+import type { PlannedDay, Recipe, Ingredient, TedSchedule } from '../types';
+import { isTedSchoolDay } from '../lib/ted';
 
 interface ShoppingItem {
   ingredientId: string;
@@ -13,11 +14,12 @@ interface Props {
   recipes: Recipe[];
   allIngredients: Ingredient[];
   stock: string[];
+  tedSchedule: TedSchedule;
   onAddToStock: (ids: string[]) => void;
   onClose: () => void;
 }
 
-export function ShoppingList({ week, recipes, allIngredients, stock, onAddToStock, onClose }: Props) {
+export function ShoppingList({ week, recipes, allIngredients, stock, tedSchedule, onAddToStock, onClose }: Props) {
   const stockSet = new Set(stock);
 
   // Verzamel alle benodigde ingrediënten uit geplande recepten
@@ -62,7 +64,7 @@ export function ShoppingList({ week, recipes, allIngredients, stock, onAddToStoc
 
   const plannedCount = week.filter((d) => d.recipeId).length;
   const boterhamDagen = week.filter((d) => d.lunch === 'boterham').length;
-  const tedDagen = week.filter((d) => d.tedSchool).length;
+  const tedDagen = week.filter((d) => isTedSchoolDay(d.date, tedSchedule)).length;
 
   // Seizoensfruit suggestie voor Ted
   const fruitInSeizoen = allIngredients

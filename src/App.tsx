@@ -69,13 +69,14 @@ export default function App() {
             month={month}
             preferences={state.preferences}
             stock={state.stock}
+            tedSchedule={state.tedSchedule}
             onAssign={state.assignMeal}
             onNavigate={(delta) => delta === 0 ? state.goToCurrentWeek() : state.navigateWeek(delta)}
             onAddToStock={state.addToStock}
             onCookMeal={state.cookMeal}
             onAddRecipe={state.addRecipe}
             onSetLunch={state.setLunch}
-            onSetTedSchool={state.setTedSchool}
+            onOverrideTed={state.overrideTed}
           />
         )}
 
@@ -103,6 +104,49 @@ export default function App() {
             <p className="text-muted" style={{ marginBottom: '1.25rem' }}>
               Wat heb je in huis? Ingrediënten in voorraad scoren hoger in suggesties en worden afgestreept op de boodschappenlijst.
             </p>
+
+            {/* Ted-schema */}
+            <div style={{ background: '#dbeafe', border: '1px solid #93c5fd', borderRadius: 'var(--radius)', padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', color: '#1e40af', marginBottom: '.5rem' }}>
+                👦 Ted-schema
+              </h3>
+              {state.tedSchedule.referenceWednesday ? (
+                <div style={{ fontSize: '.88rem' }}>
+                  <p style={{ marginBottom: '.5rem' }}>
+                    Schema actief — eerste aankomst: <strong>{state.tedSchedule.referenceWednesday}</strong>
+                  </p>
+                  <p className="text-muted" style={{ marginBottom: '.75rem', fontSize: '.8rem' }}>
+                    Ted is elke 2 weken bij jou (wo-avond t/m wo-ochtend). Schoollunch: do, vr, ma, di.
+                    Klik een dag in het weekrooster om een uitzondering te maken (vakantie, andere regeling).
+                  </p>
+                  <button
+                    onClick={() => state.setTedReference(state.tedSchedule.referenceWednesday === null ? '' : '')}
+                    style={{ fontSize: '.8rem', padding: '.3rem .65rem', border: '1px solid #93c5fd', borderRadius: 5, cursor: 'pointer', background: 'white', color: '#1e40af' }}
+                  >
+                    Schema aanpassen
+                  </button>
+                  <input
+                    type="date"
+                    style={{ marginLeft: '.5rem', padding: '.3rem .5rem', border: '1px solid #93c5fd', borderRadius: 5, fontSize: '.85rem' }}
+                    onChange={(e) => e.target.value && state.setTedReference(e.target.value)}
+                  />
+                </div>
+              ) : (
+                <div style={{ fontSize: '.88rem' }}>
+                  <p className="text-muted" style={{ marginBottom: '.75rem' }}>
+                    Stel de eerste woensdag in waarop Ted arriveert. De app berekent daarna automatisch alle Ted-weken.
+                  </p>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '.5rem', fontSize: '.88rem' }}>
+                    Eerste aankomst (woensdag):
+                    <input
+                      type="date"
+                      style={{ padding: '.3rem .5rem', border: '1px solid #93c5fd', borderRadius: 5, fontSize: '.85rem' }}
+                      onChange={(e) => e.target.value && state.setTedReference(e.target.value)}
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
 
             {/* Zoekbalk */}
             <StockPanel
