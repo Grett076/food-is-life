@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { PlannedDay, MealHistory, Recipe, Ingredient } from '../types';
+import type { PlannedDay, MealHistory, Recipe, Ingredient, Preferences } from '../types';
 import { RECIPES } from '../data/recipes';
 import { INGREDIENTS } from '../data/ingredients';
 
@@ -49,6 +49,9 @@ export function useAppState() {
   const [history, setHistory] = useState<MealHistory[]>(() =>
     load('history', []),
   );
+  const [preferences, setPreferences] = useState<Preferences>(() =>
+    load('preferences', { dislikedIngredients: ['pork', 'pumpkin'] }),
+  );
 
   // Persist
   useEffect(() => { save('recipes', recipes); }, [recipes]);
@@ -58,6 +61,7 @@ export function useAppState() {
     save(key, week);
   }, [week, weekStart]);
   useEffect(() => { save('history', history); }, [history]);
+  useEffect(() => { save('preferences', preferences); }, [preferences]);
 
   function navigateWeek(delta: number) {
     const next = new Date(weekStart);
@@ -106,6 +110,14 @@ export function useAppState() {
     setIngredients((is) => [...is, ingredient]);
   }
 
+  function toggleDisliked(ingredientId: string) {
+    setPreferences((p) => {
+      const set = new Set(p.dislikedIngredients);
+      set.has(ingredientId) ? set.delete(ingredientId) : set.add(ingredientId);
+      return { ...p, dislikedIngredients: Array.from(set) };
+    });
+  }
+
   function goToCurrentWeek() {
     const monday = getMonday(new Date());
     const key = `week-${monday.toISOString().slice(0, 10)}`;
@@ -128,5 +140,7 @@ export function useAppState() {
     updateIngredient,
     addIngredient,
     goToCurrentWeek,
+    preferences,
+    toggleDisliked,
   };
 }

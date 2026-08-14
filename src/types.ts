@@ -59,6 +59,10 @@ export interface MealHistory {
   date: string; // 'YYYY-MM-DD'
 }
 
+export interface Preferences {
+  dislikedIngredients: string[]; // penalty in ranking, nooit geblokkeerd
+}
+
 export interface AppState {
   recipes: Recipe[];
   ingredients: Ingredient[];

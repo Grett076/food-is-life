@@ -22,12 +22,13 @@ interface Props {
   allIngredients: Ingredient[];
   history: MealHistory[];
   month: number;
+  isDisliked?: boolean;
   onClick?: () => void;
   onFavorite?: () => void;
   showHistory?: boolean;
 }
 
-export function RecipeCard({ recipe, allIngredients, history, month, onClick, onFavorite, showHistory }: Props) {
+export function RecipeCard({ recipe, allIngredients, history, month, isDisliked, onClick, onFavorite, showHistory }: Props) {
   const fit = seasonFit(recipe.ingredients, allIngredients, month);
   const cooked = showHistory ? totalTimesCooked(recipe.id, history) : null;
   const days = showHistory ? daysSinceCooked(recipe.id, history) : null;
@@ -59,6 +60,7 @@ export function RecipeCard({ recipe, allIngredients, history, month, onClick, on
         {recipe.tags.slice(0, 3).map((t) => (
           <span key={t} className="tag">{t}</span>
         ))}
+        {isDisliked && <span className="tag" style={{ background: '#fee2e2', color: '#991b1b' }}>vermijd</span>}
       </div>
       {showHistory && (cooked !== null && cooked > 0) && (
         <div className="text-muted">

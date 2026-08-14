@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { PlannedDay, Recipe, Ingredient, MealHistory } from '../types';
+import type { PlannedDay, Recipe, Ingredient, MealHistory, Preferences } from '../types';
 import { MealPicker } from './MealPicker';
 import { RecipeDetail } from './RecipeDetail';
 import { seasonFit, SEASON_FIT_LABEL } from '../lib/season';
@@ -26,11 +26,12 @@ interface Props {
   ingredients: Ingredient[];
   history: MealHistory[];
   month: number;
+  preferences: Preferences;
   onAssign: (date: string, recipeId: string | null, note?: string) => void;
   onNavigate: (delta: number) => void;
 }
 
-export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, onAssign, onNavigate }: Props) {
+export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, onAssign, onNavigate }: Props) {
   const [picking, setPicking] = useState<string | null>(null); // date
   const [detail, setDetail] = useState<Recipe | null>(null);
 
@@ -134,6 +135,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
           history={history}
           month={month}
           currentRecipeId={week.find((d) => d.date === picking)?.recipeId ?? null}
+          preferences={preferences}
           onPick={(recipeId, note) => {
             onAssign(picking, recipeId, note);
             setPicking(null);

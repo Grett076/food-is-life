@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Recipe, Ingredient, MealHistory } from '../types';
+import type { Recipe, Ingredient, MealHistory, Preferences } from '../types';
 import { seasonFit, SEASON_FIT_LABEL } from '../lib/season';
 import { rankRecipes } from '../lib/suggestions';
 import { daysSinceCooked } from '../lib/history';
@@ -19,15 +19,16 @@ interface Props {
   history: MealHistory[];
   month: number;
   currentRecipeId: string | null;
+  preferences: Preferences;
   onPick: (recipeId: string | null, note?: string) => void;
   onClose: () => void;
 }
 
-export function MealPicker({ date, isWeekend, recipes, ingredients, history, month, currentRecipeId, onPick, onClose }: Props) {
+export function MealPicker({ date, isWeekend, recipes, ingredients, history, month, currentRecipeId, preferences, onPick, onClose }: Props) {
   const [note, setNote] = useState('');
   const [search, setSearch] = useState('');
 
-  const ranked = rankRecipes(recipes, history, ingredients, month);
+  const ranked = rankRecipes(recipes, history, ingredients, month, preferences);
 
   const weekendProjects = recipes.filter((r) => r.cookingStyle === 'weekendProject');
   const weekendRec = recipes.filter((r) => r.cookingStyle === 'weekend');
@@ -40,6 +41,7 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
   function PickerItem({ recipe }: { recipe: Recipe }) {
     const fit = seasonFit(recipe.ingredients, ingredients, month);
     const days = daysSinceCooked(recipe.id, history);
+    const isDisliked = recipe.ingredients.some((id) => preferences.dislikedIngredients.includes(id));
     return (
       <div
         className={`picker-item ${recipe.id === currentRecipeId ? 'active' : ''}`}
@@ -55,6 +57,9 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
         <span className={`season-badge ${fit}`} style={{ fontSize: '.7rem' }}>{SEASON_FIT_LABEL[fit]}</span>
         {days !== null && days < 7 && (
           <span className="meta" style={{ color: '#c00' }}>recent</span>
+        )}
+        {isDisliked && (
+          <span className="meta" title="Bevat een vermeden ingrediënt">〰</span>
         )}
       </div>
     );

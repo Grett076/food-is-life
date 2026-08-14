@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Recipe, Ingredient, MealHistory } from '../types';
+import type { Recipe, Ingredient, MealHistory, Preferences } from '../types';
 import { RecipeCard } from './RecipeCard';
 import { RecipeForm } from './RecipeForm';
 import { RecipeDetail } from './RecipeDetail';
@@ -28,11 +28,12 @@ interface Props {
   month: number;
   onFavorite: (id: string) => void;
   onAdd: (recipe: Recipe) => void;
+  preferences: Preferences;
   onUpdate: (recipe: Recipe) => void;
   onDelete: (id: string) => void;
 }
 
-export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite, onAdd, onUpdate, onDelete }: Props) {
+export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite, onAdd, onUpdate, onDelete, preferences }: Props) {
   const [search, setSearch] = useState('');
   const [styleFilters, setStyleFilters] = useState<Set<string>>(new Set());
   const [seasonFilter, setSeasonFilter] = useState<SeasonFilter | null>(null);
@@ -127,6 +128,7 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
             allIngredients={ingredients}
             history={history}
             month={month}
+            isDisliked={r.ingredients.some((id) => preferences.dislikedIngredients.includes(id))}
             onClick={() => setDetailRecipe(r)}
             onFavorite={() => onFavorite(r.id)}
             showHistory

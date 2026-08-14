@@ -1,4 +1,4 @@
-import type { Recipe, MealHistory, Ingredient } from '../types';
+import type { Recipe, MealHistory, Ingredient, Preferences } from '../types';
 import { seasonFit } from './season';
 import { daysSinceCooked, timesThisMonth } from './history';
 
@@ -16,7 +16,9 @@ export function rankRecipes(
   history: MealHistory[],
   allIngredients: Ingredient[],
   month: number,
+  preferences?: Preferences,
 ): Recipe[] {
+  const disliked = new Set(preferences?.dislikedIngredients ?? []);
   const scored = recipes.map((r) => {
     let score = 0;
     if (r.favorite) score += 2;
@@ -34,6 +36,10 @@ export function rankRecipes(
 
     const thisMonth = timesThisMonth(r.id, history);
     if (thisMonth >= 2) score -= 2;
+
+    // Zachte penalty voor vermeden ingrediënten
+    const hasDisliked = r.ingredients.some((id) => disliked.has(id));
+    if (hasDisliked) score -= 3;
 
     return { recipe: r, score };
   });
