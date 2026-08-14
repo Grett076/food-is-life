@@ -1723,4 +1723,33 @@ export const RECIPES: Recipe[] = [
     ],
   },
 
+  {
+    id: 'steephs-maaltijdsalade',
+    name: 'Steeph\u2019s maaltijdsalade',
+    description: 'Vleugeltjespasta met salami, mozzarella, Granny Smith, spekjes en komkommer in een flinke honing-mosterd dressing. Koud, vol van smaak en elke keer goed.',
+    servings: 3,
+    activePrepMinutes: 15, totalTimeMinutes: 30,
+    cookingStyle: 'normal', seasonTags: ['spring', 'summer', 'yearRound'],
+    tags: ['salade', 'pasta', 'koud', 'lunch', 'zomer', 'makkelijk'],
+    ingredients: ['pasta', 'mozzarella', 'bacon', 'lemon'],
+    prepTasks: [
+      { title: 'Pasta koken en laten afkoelen', relativeTime: 'Van tevoren', note: 'Koud pasta werkt het best \u2014 kan prima een paar uur van tevoren.' },
+    ],
+    recipeIngredients: [
+      { name: 'vleugeltjespasta, gekookt en gekoeld', amount: '400g', ingredientId: 'pasta' },
+      { name: 'salami (Verstege of Stegeman), in reepjes of kwarten', amount: '1 pak (~100g)' },
+      { name: 'mozzarella, grof gescheurd', amount: '2 bollen (250g)', ingredientId: 'mozzarella' },
+      { name: 'Granny Smith appels, in blokjes', amount: '2' },
+      { name: 'spekjes', amount: '1 zak (~150g)', ingredientId: 'bacon' },
+      { name: 'komkommer, in halve plakjes', amount: '1' },
+      { name: 'honing-mosterd dressing', amount: 'flink wat' },
+    ],
+    steps: [
+      { text: 'Bak de spekjes in een droge pan knapperig. Laat uitlekken op keukenpapier.', durationMinutes: 5 },
+      { text: 'Snijd de appels in blokjes, de komkommer in halve plakjes, de salami in reepjes of kwarten. Scheur de mozzarella grof.' },
+      { text: 'Doe de gekoelde pasta in een grote schaal. Voeg alle ingredi\u00ebnten toe.' },
+      { text: 'Besprenkel met flink wat honing-mosterd dressing en meng goed. Proef en voeg meer dressing toe naar smaak.' },
+    ],
+  },
+
 ];
