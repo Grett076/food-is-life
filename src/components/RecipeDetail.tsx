@@ -28,8 +28,8 @@ interface Props {
 export function RecipeDetail({ recipe, allIngredients, history, month, onEdit, onDelete, onClose }: Props) {
   const fit = seasonFit(recipe.ingredients, allIngredients, month);
   const cooked = totalTimesCooked(recipe.id, history);
-  const baseServings = recipe.servings ?? 4;
-  const [servings, setServings] = useState(baseServings);
+  const baseServings = recipe.servings ?? 2;
+  const [servings, setServings] = useState(2);
   const factor = servings / baseServings;
   const hasSeasoningWarning = factor !== 1 && recipe.recipeIngredients?.some(
     (ri) => ri.amount && /\btl\b|snuf/i.test(ri.amount),
