@@ -145,6 +145,10 @@ export function useAppState() {
     setStock((s) => Array.from(new Set([...s, ...ingredientIds])));
   }
 
+  function cookMeal(ingredientIds: string[]) {
+    setStock((s) => s.filter((id) => !ingredientIds.includes(id)));
+  }
+
   function goToCurrentWeek() {
     const monday = getMonday(new Date());
     const key = `week-${monday.toISOString().slice(0, 10)}`;
@@ -172,5 +176,6 @@ export function useAppState() {
     stock,
     toggleStock,
     addToStock,
+    cookMeal,
   };
 }

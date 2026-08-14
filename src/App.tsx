@@ -72,6 +72,7 @@ export default function App() {
             onAssign={state.assignMeal}
             onNavigate={(delta) => delta === 0 ? state.goToCurrentWeek() : state.navigateWeek(delta)}
             onAddToStock={state.addToStock}
+            onCookMeal={state.cookMeal}
           />
         )}
 

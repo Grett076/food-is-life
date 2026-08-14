@@ -126,17 +126,21 @@ export function ShoppingList({ week, recipes, allIngredients, stock, onAddToStoc
                 </p>
               )}
 
-              {/* Al in huis */}
+              {/* Al in huis — maar controleer hoeveel */}
               {alreadyHave.length > 0 && (
                 <div style={{ marginBottom: '1.25rem' }}>
-                  <h3 style={sectionHead}>Al in huis ({alreadyHave.length})</h3>
+                  <h3 style={sectionHead}>In huis — controleer hoeveel ({alreadyHave.length})</h3>
+                  <p style={{ fontSize: '.78rem', color: 'var(--text-muted)', marginBottom: '.5rem' }}>
+                    Je hebt dit in huis, maar of je genoeg hebt weet de app niet. Even checken.
+                  </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.3rem' }}>
                     {alreadyHave.sort((a, b) => a.ingredientName.localeCompare(b.ingredientName)).map((item) => (
                       <span key={item.ingredientId} style={{
                         padding: '.2rem .55rem', borderRadius: 5, fontSize: '.82rem',
-                        background: '#dcfce7', color: '#15803d',
+                        background: '#fef9c3', color: '#854d0e',
+                        border: '1px solid #fde68a',
                       }}>
-                        ✓ {item.ingredientName}
+                        ⚠ {item.ingredientName}
                       </span>
                     ))}
                   </div>
