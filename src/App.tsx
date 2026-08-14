@@ -44,10 +44,10 @@ export default function App() {
             Ingrediënten
           </button>
         </nav>
-        <span className="text-muted" style={{ marginLeft: 'auto' }}>
+        <span className="text-muted header-season" style={{ marginLeft: 'auto' }}>
           {currentSeasonLabel(month)}
         </span>
-        <div style={{ display: 'flex', gap: '.4rem' }}>
+        <div className="header-actions" style={{ display: 'flex', gap: '.4rem' }}>
           <button onClick={exportData} style={headerBtn} title="Exporteer alle data als JSON">
             ↓ Backup
           </button>

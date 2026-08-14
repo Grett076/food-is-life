@@ -59,10 +59,11 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
         <button onClick={() => onNavigate(-1)}>← Vorige</button>
         <h2>{isoToDisplay(weekStart.toISOString().slice(0, 10))} – {weekEndStr}</h2>
         <button onClick={() => onNavigate(1)}>Volgende →</button>
-        <button onClick={() => onNavigate(0)}>Vandaag</button>
+        <button className="nav-today" onClick={() => onNavigate(0)}>Vandaag</button>
         <button
+          className="nav-shopping"
           onClick={() => setShowShopping(true)}
-          style={{ marginLeft: 'auto', padding: '.35rem .8rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '.85rem' }}
+          style={{ padding: '.35rem .8rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '.85rem' }}
         >
           🛒 Boodschappenlijst
         </button>
@@ -101,7 +102,10 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
               className={`day-card${isWeekend ? ' weekend' : ''}${isToday ? ' today' : ''}`}
             >
               <div>
-                <div className="day-label">{DAY_NL[i]} — {DAY_FULL[i]}</div>
+                <div className="day-label">
+                  <span>{DAY_NL[i]}</span>
+                  <span className="day-label-full"> — {DAY_FULL[i]}</span>
+                </div>
                 <div className="day-date">{isoToDisplay(day.date)}</div>
               </div>
 
@@ -115,7 +119,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                     {recipe.totalTimeMinutes !== recipe.activePrepMinutes &&
                       ` / ${formatMinutes(recipe.totalTimeMinutes)} totaal`}
                   </div>
-                  {fit && <span className={`season-badge ${fit}`}>{SEASON_FIT_LABEL[fit]}</span>}
+                  {fit && <span className={`season-badge day-season ${fit}`}>{SEASON_FIT_LABEL[fit]}</span>}
                 </>
               ) : day.note ? (
                 <div className="day-meal">{day.note}</div>
@@ -128,7 +132,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                   {recipe || day.note ? 'Wijzigen' : 'Plannen'}
                 </button>
                 {(recipe || day.note) && (
-                  <button onClick={() => onAssign(day.date, null, undefined)}>✕</button>
+                  <button className="btn-secondary" onClick={() => onAssign(day.date, null, undefined)}>✕</button>
                 )}
               </div>
             </div>

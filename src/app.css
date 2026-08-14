@@ -363,3 +363,85 @@ main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
 .gap-sm { gap: .5rem; }
 .mt-sm { margin-top: .5rem; }
 .text-muted { color: var(--text-muted); font-size: .82rem; }
+
+/* ─── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+
+  /* Header */
+  header {
+    flex-wrap: wrap;
+    padding: .6rem 1rem;
+    gap: .4rem .75rem;
+  }
+  header h1 { font-size: 1rem; }
+  nav button { padding: .35rem .6rem; font-size: .82rem; }
+  .header-season { display: none; } /* verberg seizoenlabel op mobiel */
+  .header-actions { margin-left: auto; }
+
+  /* Main */
+  main { padding: .85rem; }
+
+  /* Week nav */
+  .week-nav {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto;
+    gap: .4rem;
+    align-items: center;
+  }
+  .week-nav h2 { text-align: center; font-size: .88rem; }
+  .week-nav .nav-today { grid-column: 1; grid-row: 2; }
+  .week-nav .nav-shopping { grid-column: 2 / 4; grid-row: 2; justify-self: end; }
+
+  /* Dag kaarten — compact horizontal op mobiel */
+  .week-grid { gap: .4rem; }
+  .day-card {
+    flex-direction: row;
+    align-items: center;
+    min-height: unset;
+    padding: .65rem .85rem;
+    gap: .75rem;
+  }
+  .day-card .day-date { display: none; }
+  .day-card .day-meta { display: none; }
+  .day-card .day-season { display: none; }
+  .day-label {
+    font-size: .7rem;
+    min-width: 26px;
+    line-height: 1.3;
+  }
+  .day-label-full { display: none; } /* verberg lange naam */
+  .day-meal { font-size: .88rem; }
+  .day-actions .btn-secondary { display: none; } /* verberg ✕ op mobiel */
+
+  /* Modals — bottom sheet op mobiel */
+  .modal-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .modal {
+    border-radius: var(--radius) var(--radius) 0 0;
+    max-width: 100%;
+    max-height: 92vh;
+  }
+
+  /* Library filters — scrollbaar */
+  .library-controls {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: .25rem;
+    gap: .4rem;
+  }
+  .library-controls input[type="search"] {
+    min-width: 130px;
+    flex-shrink: 0;
+  }
+  .filter-btn { white-space: nowrap; flex-shrink: 0; }
+
+  /* Recipe grid — 1 kolom onder 480px */
+  .recipe-grid { grid-template-columns: 1fr; }
+
+  /* Recept form grid aanpassingen */
+  .recipe-form-times { grid-template-columns: 1fr 1fr !important; }
+}
