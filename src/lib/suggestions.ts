@@ -19,7 +19,6 @@ export function rankRecipes(
   preferences?: Preferences,
   stock?: string[],
 ): Recipe[] {
-  const disliked = new Set(preferences?.dislikedIngredients ?? []);
   const excluded = new Set(preferences?.excludedRecipes ?? []);
   const inStock = new Set(stock ?? []);
   const scored = recipes.map((r) => {
@@ -42,9 +41,6 @@ export function rankRecipes(
 
     // Penalty voor uitgesloten recepten
     if (excluded.has(r.id)) score -= 4;
-
-    // Penalty voor vermeden ingrediënten (ingredient-niveau, optioneel)
-    if (r.ingredients.some((id) => disliked.has(id))) score -= 2;
 
     // Bonus als veel ingrediënten in voorraad
     if (inStock.size > 0 && r.ingredients.length > 0) {

@@ -61,7 +61,7 @@ export function useAppState() {
     load('history', []),
   );
   const [preferences, setPreferences] = useState<Preferences>(() =>
-    load('preferences', { dislikedIngredients: [], excludedRecipes: [] }),
+    load('preferences', { excludedRecipes: [] }),
   );
   const [stock, setStock] = useState<string[]>(() =>
     load('stock', []),
@@ -125,14 +125,6 @@ export function useAppState() {
     setIngredients((is) => [...is, ingredient]);
   }
 
-  function toggleDisliked(ingredientId: string) {
-    setPreferences((p) => {
-      const set = new Set(p.dislikedIngredients);
-      set.has(ingredientId) ? set.delete(ingredientId) : set.add(ingredientId);
-      return { ...p, dislikedIngredients: Array.from(set) };
-    });
-  }
-
   function toggleExcluded(recipeId: string) {
     setPreferences((p) => {
       const set = new Set(p.excludedRecipes ?? []);
@@ -176,7 +168,6 @@ export function useAppState() {
     addIngredient,
     goToCurrentWeek,
     preferences,
-    toggleDisliked,
     toggleExcluded,
     stock,
     toggleStock,

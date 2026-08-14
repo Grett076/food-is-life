@@ -60,8 +60,7 @@ export interface MealHistory {
 }
 
 export interface Preferences {
-  dislikedIngredients: string[]; // penalty in ranking, nooit geblokkeerd
-  excludedRecipes: string[];     // per recept: niet mijn ding
+  excludedRecipes: string[]; // per recept: niet mijn ding
 }
 
 export interface AppState {

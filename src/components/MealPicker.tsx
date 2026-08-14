@@ -42,7 +42,7 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
   function PickerItem({ recipe }: { recipe: Recipe }) {
     const fit = seasonFit(recipe.ingredients, ingredients, month);
     const days = daysSinceCooked(recipe.id, history);
-    const isDisliked = recipe.ingredients.some((id) => preferences.dislikedIngredients.includes(id));
+    const isExcluded = (preferences.excludedRecipes ?? []).includes(recipe.id);
     return (
       <div
         className={`picker-item ${recipe.id === currentRecipeId ? 'active' : ''}`}
@@ -59,8 +59,8 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
         {days !== null && days < 7 && (
           <span className="meta" style={{ color: '#c00' }}>recent</span>
         )}
-        {isDisliked && (
-          <span className="meta" title="Bevat een vermeden ingrediënt">〰</span>
+        {isExcluded && (
+          <span className="meta" title="Niet mijn ding">🚫</span>
         )}
       </div>
     );
