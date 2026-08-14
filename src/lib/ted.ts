@@ -1,8 +1,20 @@
 import type { TedSchedule } from '../types';
 
+/** Geeft aan of Ted fysiek aanwezig is op deze dag (wo-avond t/m di) */
+export function isInTedPeriod(date: string, schedule: TedSchedule): boolean {
+  if (!schedule.referenceWednesday) return false;
+  const d = new Date(date);
+  const ref = new Date(schedule.referenceWednesday);
+  const diffDays = Math.round((d.getTime() - ref.getTime()) / 86_400_000);
+  const cycle = ((diffDays % 14) + 14) % 14;
+  // Dag 0 = woensdag aankomst (avond, Ted is er niet overdag)
+  // Dag 1–6 = do t/m di (Ted is er)
+  // Dag 7 = woensdag vertrek ochtend (Ted weg)
+  return cycle >= 1 && cycle <= 6;
+}
+
 /**
  * Geeft aan of een gegeven datum een Ted-schooldag is.
- * Ted is er van woensdag avond t/m woensdagochtend, elke twee weken.
  * Schooldagen: do en vr van aankomstweek, ma en di van vertrekweek.
  * Woensdag zelf telt niet (aankomst is 's avonds, overdag bij oma).
  */

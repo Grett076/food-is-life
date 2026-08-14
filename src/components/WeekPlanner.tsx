@@ -5,7 +5,7 @@ import { RecipeDetail } from './RecipeDetail';
 import { CookedModal } from './CookedModal';
 import { ShoppingList } from './ShoppingList';
 import { seasonFit, SEASON_FIT_LABEL } from '../lib/season';
-import { isTedSchoolDay } from '../lib/ted';
+import { isTedSchoolDay, isInTedPeriod } from '../lib/ted';
 
 const DAY_NL = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
 const DAY_FULL = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
@@ -154,13 +154,16 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                       {day.lunch === 'boterham' ? '🥪 Boterham' : '🥪 —'}
                     </button>
                   )}
-                  {/* Ted — altijd zichtbaar als schema bekend */}
+                  {/* Ted — toon alleen als Ted er is (of override) */}
                   {tedSchedule.referenceWednesday && (() => {
                     const isTed = isTedSchoolDay(day.date, tedSchedule);
+                    const inPeriod = isInTedPeriod(day.date, tedSchedule);
+                    const hasOverride = day.date in tedSchedule.overrides;
+                    if (!inPeriod && !hasOverride) return null; // verberg op niet-Ted-dagen
                     return (
                       <button
                         onClick={() => onOverrideTed(day.date, !isTed)}
-                        title={isTed ? 'Ted heeft schoollunch (klik voor uitzondering)' : 'Ted niet (klik om toe te voegen)'}
+                        title={isTed ? 'Schoollunch Ted (klik voor uitzondering)' : 'Ted is er, geen schoollunch (klik om toe te voegen)'}
                         style={{
                           fontSize: '.72rem', padding: '.15rem .45rem', borderRadius: 4, cursor: 'pointer', border: '1px solid',
                           background: isTed ? '#dbeafe' : 'var(--tag-bg)',
