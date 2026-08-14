@@ -3,6 +3,8 @@ import type { PlannedDay, MealHistory, Recipe, Ingredient, Preferences } from '.
 import { RECIPES } from '../data/recipes';
 import { INGREDIENTS } from '../data/ingredients';
 
+const DATA_VERSION = 3; // verhoog bij wijzigingen in seed-recepten of ingrediënten
+
 function getMonday(date: Date): Date {
   const d = new Date(date);
   const day = d.getDay();
@@ -34,6 +36,15 @@ function save<T>(key: string, value: T): void {
 }
 
 export function useAppState() {
+  // Seed-data migratie: als versie verouderd is, reset recepten en ingrediënten
+  // maar bewaar gebruikersdata (geschiedenis, planning, voorraad, voorkeuren)
+  const storedVersion = load<number>('dataVersion', 0);
+  if (storedVersion < DATA_VERSION) {
+    localStorage.setItem('recipes', JSON.stringify(RECIPES));
+    localStorage.setItem('ingredients', JSON.stringify(INGREDIENTS));
+    localStorage.setItem('dataVersion', String(DATA_VERSION));
+  }
+
   const [recipes, setRecipes] = useState<Recipe[]>(() =>
     load('recipes', RECIPES),
   );
