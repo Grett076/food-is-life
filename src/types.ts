@@ -19,19 +19,33 @@ export interface Ingredient {
   peakMonths?: number[];
 }
 
+export interface RecipeIngredient {
+  name: string;          // displaynaam incl. snijwijze: "ui, fijngesnipperd"
+  amount?: string;       // "400g", "2 el", "1 teen", "naar smaak"
+  ingredientId?: string; // koppeling aan Ingredient voor seizoensscore
+  note?: string;         // "op kamertemperatuur", optioneel
+}
+
+export interface RecipeStep {
+  text: string;
+  durationMinutes?: number;
+}
+
 export interface Recipe {
   id: string;
   name: string;
   description?: string;
+  servings?: number;
   activePrepMinutes: number;
   totalTimeMinutes: number;
   cookingStyle: CookingStyle;
   seasonTags: SeasonTag[];
   tags: string[];
-  ingredients: string[]; // ingredient ids
+  ingredients: string[];             // ingredient ids voor seizoensscore
+  recipeIngredients?: RecipeIngredient[]; // volledig met hoeveelheden
+  steps?: RecipeStep[];              // bereidingsstappen
   prepTasks?: PrepTask[];
   favorite?: boolean;
-  image?: string;
 }
 
 export interface PlannedDay {
