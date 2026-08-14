@@ -34,9 +34,10 @@ interface Props {
   onNavigate: (delta: number) => void;
   onAddToStock: (ids: string[]) => void;
   onCookMeal: (ingredientIds: string[]) => void;
+  onAddRecipe: (recipe: Recipe) => void;
 }
 
-export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, onAssign, onNavigate, onAddToStock, onCookMeal }: Props) {
+export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, onAssign, onNavigate, onAddToStock, onCookMeal, onAddRecipe }: Props) {
   const [picking, setPicking] = useState<string | null>(null); // date
   const [detail, setDetail] = useState<Recipe | null>(null);
   const [showShopping, setShowShopping] = useState(false);
@@ -158,6 +159,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
           currentRecipeId={week.find((d) => d.date === picking)?.recipeId ?? null}
           preferences={preferences}
           stock={stock}
+          onAddRecipe={onAddRecipe}
           onPick={(recipeId, note) => {
             onAssign(picking, recipeId, note);
             setPicking(null);

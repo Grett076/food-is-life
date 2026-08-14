@@ -3,6 +3,7 @@ import type { Recipe, Ingredient, MealHistory, Preferences } from '../types';
 import { seasonFit, SEASON_FIT_LABEL } from '../lib/season';
 import { rankRecipes } from '../lib/suggestions';
 import { daysSinceCooked } from '../lib/history';
+import { RecipeForm } from './RecipeForm';
 
 function formatMinutes(m: number): string {
   if (m < 60) return `${m} min`;
@@ -22,12 +23,14 @@ interface Props {
   preferences: Preferences;
   stock: string[];
   onPick: (recipeId: string | null, note?: string) => void;
+  onAddRecipe: (recipe: Recipe) => void;
   onClose: () => void;
 }
 
-export function MealPicker({ date, isWeekend, recipes, ingredients, history, month, currentRecipeId, preferences, stock, onPick, onClose }: Props) {
+export function MealPicker({ date, isWeekend, recipes, ingredients, history, month, currentRecipeId, preferences, stock, onPick, onAddRecipe, onClose }: Props) {
   const [note, setNote] = useState('');
   const [search, setSearch] = useState('');
+  const [showForm, setShowForm] = useState(false);
 
   const ranked = rankRecipes(recipes, history, ingredients, month, preferences, stock);
 
@@ -67,11 +70,31 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
   }
 
   return (
-    <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <>
+      {showForm && (
+        <RecipeForm
+          allIngredients={ingredients}
+          onSave={(recipe) => {
+            onAddRecipe(recipe);
+            onPick(recipe.id);
+            onClose();
+          }}
+          onClose={() => setShowForm(false)}
+        />
+      )}
+      <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal">
         <div className="modal-header">
           <h2>Maaltijd kiezen — {date}</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
+            <button
+              onClick={() => setShowForm(true)}
+              style={{ fontSize: '.8rem', padding: '.3rem .65rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 5, cursor: 'pointer' }}
+            >
+              + Recept
+            </button>
+            <button className="modal-close" onClick={onClose}>×</button>
+          </div>
         </div>
         <div className="modal-body">
 
@@ -135,5 +158,6 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
         </div>
       </div>
     </div>
+    </>
   );
 }
