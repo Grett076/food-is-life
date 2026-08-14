@@ -18,8 +18,14 @@ function formatMinutes(m: number): string {
 }
 
 function isoToDisplay(date: string): string {
-  const d = new Date(date);
-  return `${d.getDate()} ${['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][d.getMonth()]}`;
+  // Parse als lokale datum (YYYY-MM-DD), niet UTC
+  const [y, m, d] = date.split('-').map(Number);
+  const local = new Date(y, m - 1, d);
+  return `${local.getDate()} ${['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][local.getMonth()]}`;
+}
+
+function localDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 interface Props {
@@ -50,15 +56,14 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
   const [cookedRecipe, setCookedRecipe] = useState<Recipe | null>(null);
   const [showTedSetup, setShowTedSetup] = useState(false);
 
-  const mondayStr = weekStart.toISOString().slice(0, 10);
+  const mondayStr = (() => { const d = weekStart; return localDateStr(d); })();
   const tedThisWeek = isTedWeek(mondayStr, tedSchedule);
-
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateStr(new Date());
 
   const weekEndStr = (() => {
     const d = new Date(weekStart);
     d.setDate(d.getDate() + 6);
-    return isoToDisplay(d.toISOString().slice(0, 10));
+    return isoToDisplay(localDateStr(d));
   })();
 
   // Weekendprojecten met prepTasks die voor dit weekend relevant zijn
@@ -71,7 +76,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
     <div>
       <div className="week-nav">
         <button onClick={() => onNavigate(-1)}>← Vorige</button>
-        <h2>{isoToDisplay(weekStart.toISOString().slice(0, 10))} – {weekEndStr}</h2>
+        <h2>{isoToDisplay(localDateStr(weekStart))} – {weekEndStr}</h2>
         <button onClick={() => onNavigate(1)}>Volgende →</button>
         <button className="nav-today" onClick={() => onNavigate(0)}>Vandaag</button>
         {/* Ted-week toggle */}

@@ -5,6 +5,15 @@ import { INGREDIENTS } from '../data/ingredients';
 
 const DATA_VERSION = 11; // verhoog bij wijzigingen in seed-recepten of ingrediënten
 
+/** Formatteer een Date als lokale YYYY-MM-DD string (niet UTC) */
+function localDateStr(d: Date): string {
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0'),
+  ].join('-');
+}
+
 function getMonday(date: Date): Date {
   const d = new Date(date);
   const day = d.getDay();
@@ -18,9 +27,9 @@ function buildWeek(monday: Date): PlannedDay[] {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
-    const isWorkday = i < 5; // ma–vr
+    const isWorkday = i < 5;
     return {
-      date: d.toISOString().slice(0, 10),
+      date: localDateStr(d),
       recipeId: null,
       lunch: isWorkday ? 'boterham' : null,
     };
@@ -59,7 +68,7 @@ export function useAppState() {
   const [weekStart, setWeekStart] = useState<Date>(() => getMonday(new Date()));
   const [week, setWeek] = useState<PlannedDay[]>(() => {
     const monday = getMonday(new Date());
-    const key = `week-${monday.toISOString().slice(0, 10)}`;
+    const key = `week-${localDateStr(monday) }`;
     return load(key, buildWeek(monday));
   });
   const [history, setHistory] = useState<MealHistory[]>(() =>
@@ -84,7 +93,7 @@ export function useAppState() {
   useEffect(() => { save('recipes', recipes); }, [recipes]);
   useEffect(() => { save('ingredients', ingredients); }, [ingredients]);
   useEffect(() => {
-    const key = `week-${weekStart.toISOString().slice(0, 10)}`;
+    const key = `week-${localDateStr(weekStart) }`;
     save(key, week);
   }, [week, weekStart]);
   useEffect(() => { save('history', history); }, [history]);
@@ -95,7 +104,7 @@ export function useAppState() {
   function navigateWeek(delta: number) {
     const next = new Date(weekStart);
     next.setDate(next.getDate() + delta * 7);
-    const key = `week-${next.toISOString().slice(0, 10)}`;
+    const key = `week-${localDateStr(next) }`;
     setWeekStart(next);
     setWeek(load(key, buildWeek(next)));
   }
@@ -190,7 +199,7 @@ export function useAppState() {
 
   function goToCurrentWeek() {
     const monday = getMonday(new Date());
-    const key = `week-${monday.toISOString().slice(0, 10)}`;
+    const key = `week-${localDateStr(monday) }`;
     setWeekStart(monday);
     setWeek(load(key, buildWeek(monday)));
   }
