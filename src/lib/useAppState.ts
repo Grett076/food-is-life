@@ -3,7 +3,7 @@ import type { PlannedDay, MealHistory, Recipe, Ingredient, Preferences } from '.
 import { RECIPES } from '../data/recipes';
 import { INGREDIENTS } from '../data/ingredients';
 
-const DATA_VERSION = 5; // verhoog bij wijzigingen in seed-recepten of ingrediënten
+const DATA_VERSION = 6; // verhoog bij wijzigingen in seed-recepten of ingrediënten
 
 function getMonday(date: Date): Date {
   const d = new Date(date);
