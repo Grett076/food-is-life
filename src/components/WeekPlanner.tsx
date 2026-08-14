@@ -5,7 +5,7 @@ import { RecipeDetail } from './RecipeDetail';
 import { CookedModal } from './CookedModal';
 import { ShoppingList } from './ShoppingList';
 import { seasonFit, SEASON_FIT_LABEL } from '../lib/season';
-import { isTedSchoolDay, isTedWeek } from '../lib/ted';
+import { isTedSchoolDay, tedWeekInfo, isArrivedWednesday } from '../lib/ted';
 
 const DAY_NL = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
 const DAY_FULL = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
@@ -44,12 +44,15 @@ interface Props {
   onCookMeal: (ingredientIds: string[]) => void;
   onAddRecipe: (recipe: Recipe) => void;
   onSetLunch: (date: string, value: 'boterham' | 'skip' | null) => void;
-  onToggleTedWeek: (mondayStr: string, force: boolean) => void;
+  onToggleTedWeek?: never; // vervangen door expliciete aankomst-controls
+  onAddTedArrival: (wednesdayStr: string) => void;
+  onSkipTedArrival: (wednesdayStr: string) => void;
+  onClearTedOverride: (wednesdayStr: string) => void;
   onSetTedReference: (wednesday: string) => void;
   onResetTed: () => void;
 }
 
-export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, tedSchedule, onAssign, onNavigate, onAddToStock, onCookMeal, onAddRecipe, onSetLunch, onToggleTedWeek, onSetTedReference, onResetTed }: Props) {
+export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, tedSchedule, onAssign, onNavigate, onAddToStock, onCookMeal, onAddRecipe, onSetLunch, onAddTedArrival, onSkipTedArrival, onClearTedOverride, onSetTedReference, onResetTed }: Props) {
   const [picking, setPicking] = useState<string | null>(null);
   const [detail, setDetail] = useState<Recipe | null>(null);
   const [showShopping, setShowShopping] = useState(false);
@@ -57,7 +60,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
   const [showTedSetup, setShowTedSetup] = useState(false);
 
   const mondayStr = (() => { const d = weekStart; return localDateStr(d); })();
-  const tedThisWeek = isTedWeek(mondayStr, tedSchedule);
+  const tedInfo = tedWeekInfo(mondayStr, tedSchedule);
   const today = localDateStr(new Date());
 
   const weekEndStr = (() => {
@@ -79,20 +82,48 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
         <h2>{isoToDisplay(localDateStr(weekStart))} – {weekEndStr}</h2>
         <button onClick={() => onNavigate(1)}>Volgende →</button>
         <button className="nav-today" onClick={() => onNavigate(0)}>Vandaag</button>
-        {/* Ted-week toggle */}
+        {/* Ted aankomst controls */}
         {tedSchedule.referenceWednesday ? (
-          <button
-            onClick={() => onToggleTedWeek(mondayStr, !tedThisWeek)}
-            title={tedThisWeek ? 'Ted-week — klik om over te slaan' : 'Geen Ted-week — klik om te forceren'}
-            style={{
-              padding: '.35rem .7rem', border: '1px solid', borderRadius: 6, cursor: 'pointer', fontSize: '.82rem',
-              background: tedThisWeek ? '#dbeafe' : 'var(--tag-bg)',
-              borderColor: tedThisWeek ? '#93c5fd' : 'var(--border)',
-              color: tedThisWeek ? '#1e40af' : 'var(--text-muted)',
-            }}
-          >
-            👦 {tedThisWeek ? 'Ted-week' : 'Geen Ted'}
-          </button>
+          <div style={{ display: 'flex', gap: '.35rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            {tedInfo.arrivalWed && (
+              // Ted arriveert deze week (wo) → do/vr zijn schooldagen
+              isArrivedWednesday(tedInfo.arrivalWed, tedSchedule) && !(tedInfo.arrivalWed in (tedSchedule.arrivalOverrides ?? {})) ? (
+                // Ingepland, geen override: toon overslaan-knop
+                <button
+                  onClick={() => onSkipTedArrival(tedInfo.arrivalWed!)}
+                  style={btnStyle('#dbeafe', '#93c5fd', '#1e40af')}
+                  title="Ted arriveert woensdag — klik om deze week over te slaan"
+                >
+                  👦 Ted wo {fmt(tedInfo.arrivalWed)} ✕
+                </button>
+              ) : (
+                // Geforceerde aankomst: toon wissen-knop
+                <button
+                  onClick={() => onClearTedOverride(tedInfo.arrivalWed!)}
+                  style={btnStyle('#d1fae5', '#6ee7b7', '#065f46')}
+                  title="Geforceerde aankomst — klik om te wissen"
+                >
+                  👦 Ted wo {fmt(tedInfo.arrivalWed)} ✓
+                </button>
+              )
+            )}
+            {tedInfo.departureWed && !tedInfo.arrivalWed && (
+              // Ted is er (ma/di) maar de aankomst was vorige week — toon info
+              <span style={{ fontSize: '.78rem', padding: '.15rem .45rem', borderRadius: 4, background: '#e0f2fe', color: '#0369a1', border: '1px solid #7dd3fc' }}>
+                👦 Ted vertrekt wo {fmt(tedInfo.departureWed)}
+              </span>
+            )}
+            {!tedInfo.hasSchoolDays && (
+              // Geen Ted deze week — toon toevoegen-knop voor de woensdag van deze week
+              <button
+                onClick={() => onAddTedArrival((() => { const d = weekStart; const wed = new Date(d); wed.setDate(wed.getDate() + 2); return localDateStr(wed); })())}
+                style={btnStyle('var(--tag-bg)', 'var(--border)', 'var(--text-muted)')}
+                title="Ted toevoegen voor deze week"
+              >
+                👦 Ted toevoegen
+              </button>
+            )}
+          </div>
         ) : (
           <button
             onClick={() => setShowTedSetup(true)}
@@ -307,4 +338,13 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
       )}
     </div>
   );
+}
+
+function fmt(dateStr: string): string {
+  const [, m, d] = dateStr.split('-').map(Number);
+  return `${d} ${['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][m-1]}`;
+}
+
+function btnStyle(bg: string, border: string, color: string): React.CSSProperties {
+  return { padding: '.3rem .65rem', border: `1px solid ${border}`, borderRadius: 6, cursor: 'pointer', fontSize: '.8rem', background: bg, color };
 }

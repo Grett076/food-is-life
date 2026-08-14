@@ -76,7 +76,9 @@ export default function App() {
             onCookMeal={state.cookMeal}
             onAddRecipe={state.addRecipe}
             onSetLunch={state.setLunch}
-            onToggleTedWeek={state.toggleTedWeek}
+            onAddTedArrival={state.addTedArrival}
+            onSkipTedArrival={state.skipTedArrival}
+            onClearTedOverride={state.clearTedOverride}
             onSetTedReference={state.setTedReference}
             onResetTed={state.resetTedSchedule}
           />

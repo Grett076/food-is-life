@@ -81,12 +81,12 @@ export function useAppState() {
     load('stock', []),
   );
   const [tedSchedule, setTedSchedule] = useState<TedSchedule>(() => {
-    const stored = load<any>('tedSchedule', { referenceWednesday: null, weekOverrides: {} });
-    // Migreer oude 'overrides' key naar 'weekOverrides'
-    if (stored.overrides !== undefined && stored.weekOverrides === undefined) {
-      return { referenceWednesday: stored.referenceWednesday ?? null, weekOverrides: {} };
-    }
-    return { referenceWednesday: stored.referenceWednesday ?? null, weekOverrides: stored.weekOverrides ?? {} };
+    const stored = load<any>('tedSchedule', { referenceWednesday: null, arrivalOverrides: {} });
+    // Migreer oude weekOverrides/overrides naar arrivalOverrides (drop, niet te converteren)
+    return {
+      referenceWednesday: stored.referenceWednesday ?? null,
+      arrivalOverrides: stored.arrivalOverrides ?? {},
+    };
   });
 
   // Persist
@@ -133,18 +133,36 @@ export function useAppState() {
   }
 
   function setTedReference(wednesday: string) {
-    setTedSchedule({ referenceWednesday: wednesday, weekOverrides: {} });
+    setTedSchedule({ referenceWednesday: wednesday, arrivalOverrides: {} });
   }
 
   function resetTedSchedule() {
-    setTedSchedule({ referenceWednesday: null, weekOverrides: {} });
+    setTedSchedule({ referenceWednesday: null, arrivalOverrides: {} });
   }
 
-  function toggleTedWeek(mondayStr: string, force: boolean) {
+  /** Forceer aankomst op een specifieke woensdag (ook als niet in schema) */
+  function addTedArrival(wednesdayStr: string) {
     setTedSchedule((s) => ({
       ...s,
-      weekOverrides: { ...s.weekOverrides, [mondayStr]: force },
+      arrivalOverrides: { ...s.arrivalOverrides, [wednesdayStr]: true },
     }));
+  }
+
+  /** Sla een geplande aankomst over op een specifieke woensdag */
+  function skipTedArrival(wednesdayStr: string) {
+    setTedSchedule((s) => ({
+      ...s,
+      arrivalOverrides: { ...s.arrivalOverrides, [wednesdayStr]: false },
+    }));
+  }
+
+  /** Verwijder een override (herstel naar schema) */
+  function clearTedOverride(wednesdayStr: string) {
+    setTedSchedule((s) => {
+      const next = { ...s.arrivalOverrides };
+      delete next[wednesdayStr];
+      return { ...s, arrivalOverrides: next };
+    });
   }
 
   function toggleFavorite(recipeId: string) {
@@ -230,6 +248,8 @@ export function useAppState() {
     overrideTed,
     setTedReference,
     resetTedSchedule,
-    toggleTedWeek,
+    addTedArrival,
+    skipTedArrival,
+    clearTedOverride,
   };
 }

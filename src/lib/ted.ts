@@ -1,92 +1,93 @@
 import type { TedSchedule } from '../types';
 
-// Gebruik UTC overal om DST-problemen te vermijden
-function getMondayStr(date: Date): string {
-  const d = new Date(date);
-  const dow = d.getUTCDay(); // 0=zo, 1=ma, ..., 6=za
-  d.setUTCDate(d.getUTCDate() - (dow === 0 ? 6 : dow - 1));
-  return d.toISOString().slice(0, 10);
+/** Parse YYYY-MM-DD als lokale datum en geef lokale dag van de week (0=zo…6=za) */
+function localDow(dateStr: string): number {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d).getDay();
 }
 
+/** Tel n dagen op/af bij een YYYY-MM-DD string (lokale datum) */
 function addDays(dateStr: string, n: number): string {
-  const d = new Date(dateStr);
-  d.setUTCDate(d.getUTCDate() + n);
-  return d.toISOString().slice(0, 10);
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const result = new Date(y, m - 1, d + n);
+  return [
+    result.getFullYear(),
+    String(result.getMonth() + 1).padStart(2, '0'),
+    String(result.getDate()).padStart(2, '0'),
+  ].join('-');
 }
 
+/** Verschil in kalenderdagen tussen twee YYYY-MM-DD strings */
 function diffDays(a: string, b: string): number {
-  return Math.round((new Date(a).getTime() - new Date(b).getTime()) / 86_400_000);
+  const [ay, am, ad] = a.split('-').map(Number);
+  const [by, bm, bd] = b.split('-').map(Number);
+  return Math.round(
+    (Date.UTC(ay, am - 1, ad) - Date.UTC(by, bm - 1, bd)) / 86_400_000,
+  );
 }
 
-/**
- * Is dit de aankomstweek van Ted?
- * De woensdag van deze week (maandag + 2) is een veelvoud van 14 dagen
- * verwijderd van de referentiewoensdag.
- */
-function isArrivalWeek(mondayStr: string, schedule: TedSchedule): boolean {
+/** Is deze woensdag een ingepland Ted-aankomst (op basis van schema)? */
+function isScheduledArrival(wednesdayStr: string, referenceWednesday: string): boolean {
+  return diffDays(wednesdayStr, referenceWednesday) % 14 === 0;
+}
+
+/** Is Ted op deze specifieke woensdag aangekomen (schema + overrides)? */
+export function isArrivedWednesday(wednesdayStr: string, schedule: TedSchedule): boolean {
+  const overrides = schedule.arrivalOverrides ?? {};
+  if (wednesdayStr in overrides) return overrides[wednesdayStr];
   if (!schedule.referenceWednesday) return false;
-  const wed = addDays(mondayStr, 2); // woensdag = maandag + 2
-  const diff = diffDays(wed, schedule.referenceWednesday);
-  return diff % 14 === 0;
+  return isScheduledArrival(wednesdayStr, schedule.referenceWednesday);
 }
 
 /**
- * Is dit een Ted-schooldag?
- * - Do (4) en vr (5): aankomstweek van die week
- * - Ma (1) en di (2): vertrekweek = week ná de aankomstweek
+ * Geeft de woensdag die bij deze datum hoort als Ted-aankomst:
+ * - do (4) / vr (5): de woensdag van déze week
+ * - ma (1) / di (2): de woensdag van de vorige week
  */
+function arrivalWednesdayFor(dateStr: string): string {
+  const dow = localDow(dateStr);
+  if (dow === 4 || dow === 5) return addDays(dateStr, 3 - dow); // do: -1, vr: -2
+  if (dow === 1 || dow === 2) return addDays(dateStr, -(dow + 4)); // ma: -5, di: -6
+  return ''; // niet relevant
+}
+
+/** Is dit een Ted-schooldag? */
 export function isTedSchoolDay(date: string, schedule: TedSchedule): boolean {
-  if (!schedule.referenceWednesday) return false;
-
-  const monday = getMondayStr(new Date(date));
-  const overrides = schedule.weekOverrides ?? {};
-
-  // Week-override heeft voorrang
-  if (monday in overrides) {
-    if (!overrides[monday]) return false;
-    const dow = new Date(date).getUTCDay();
-    return [1, 2, 4, 5].includes(dow); // ma, di, do, vr
-  }
-
-  const dow = new Date(date).getUTCDay();
-
-  if (dow === 4 || dow === 5) {
-    // Do en vr horen bij de aankomstweek
-    return isArrivalWeek(monday, schedule);
-  }
-  if (dow === 1 || dow === 2) {
-    // Ma en di horen bij de week NA de aankomstweek
-    return isArrivalWeek(addDays(monday, -7), schedule);
-  }
-  return false;
+  const dow = localDow(date);
+  if (![1, 2, 4, 5].includes(dow)) return false; // alleen ma/di/do/vr
+  const wed = arrivalWednesdayFor(date);
+  return isArrivedWednesday(wed, schedule);
 }
 
-/** Is Ted fysiek aanwezig op deze dag? (do t/m di van zijn verblijf) */
-export function isInTedPeriod(date: string, schedule: TedSchedule): boolean {
-  if (!schedule.referenceWednesday) return false;
-  const monday = getMondayStr(new Date(date));
-  const overrides = schedule.weekOverrides ?? {};
-  if (monday in overrides) return overrides[monday];
-  const dow = new Date(date).getUTCDay();
-  // Do(4), vr(5), za(6), zo(0) van aankomstweek + ma(1), di(2) van volgende week
-  if ([4, 5, 6, 0].includes(dow)) return isArrivalWeek(monday, schedule);
-  if ([1, 2].includes(dow)) return isArrivalWeek(addDays(monday, -7), schedule);
-  return false;
-}
+/**
+ * Ted-info voor een week (maandag t/m zondag):
+ * - arrivalWed: de woensdag van aankomst (als die in deze week valt)
+ * - departureWed: de woensdag van vertrek (als ma/di in deze week Ted-schooldagen zijn)
+ * - hasSchoolDays: zijn er schooldagen deze week?
+ */
+export function tedWeekInfo(mondayStr: string, schedule: TedSchedule) {
+  const thisWed = addDays(mondayStr, 2);
+  const prevWed = addDays(mondayStr, -5); // vorige woensdag = maandag - 5 dagen
 
-/** Heeft deze week (ma-zo) minstens één Ted-schooldag? */
-export function isTedWeek(mondayStr: string, schedule: TedSchedule): boolean {
-  if (!schedule.referenceWednesday) return false;
-  const overrides = schedule.weekOverrides ?? {};
-  if (mondayStr in overrides) return overrides[mondayStr];
-  // Aankomstweek (do+vr) OF de week erna (ma+di)
-  return isArrivalWeek(mondayStr, schedule) || isArrivalWeek(addDays(mondayStr, -7), schedule);
+  const arrivalThisWeek = isArrivedWednesday(thisWed, schedule);
+  const arrivalPrevWeek = isArrivedWednesday(prevWed, schedule);
+
+  return {
+    /** Aankomst-woensdag als Ted dit week arriveert (do/vr) */
+    arrivalWed: arrivalThisWeek ? thisWed : null,
+    /** Vertrek-woensdag als Ted dit week vertrekt (ma/di) */
+    departureWed: arrivalPrevWeek ? thisWed : null, // Ted vertrekt de woensdag ná zijn aankomstweek
+    hasSchoolDays: arrivalThisWeek || arrivalPrevWeek,
+  };
 }
 
 /** De dichtstbijzijnde aanstaande woensdag */
 export function nextWednesday(): string {
-  const d = new Date();
-  const dow = d.getUTCDay();
-  d.setUTCDate(d.getUTCDate() + (dow <= 3 ? 3 - dow : 10 - dow));
-  return d.toISOString().slice(0, 10);
+  const now = new Date();
+  const dow = now.getDay();
+  const days = dow <= 3 ? 3 - dow : 10 - dow;
+  return addDays(
+    [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-'),
+    days,
+  );
 }

@@ -63,8 +63,8 @@ export interface MealHistory {
 
 export interface TedSchedule {
   referenceWednesday: string | null;
-  /** Weken (maandag-datum) waarbij het schema is overschreven: true = Ted-week forceren, false = Ted-week overslaan */
-  weekOverrides: Record<string, boolean>;
+  /** Specifieke woensdagen die de auto-berekening overschrijven: true=forceer aankomst, false=sla over */
+  arrivalOverrides: Record<string, boolean>;
 }
 
 export interface Preferences {
