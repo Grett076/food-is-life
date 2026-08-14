@@ -5,7 +5,7 @@ import { RecipeDetail } from './RecipeDetail';
 import { CookedModal } from './CookedModal';
 import { ShoppingList } from './ShoppingList';
 import { seasonFit, SEASON_FIT_LABEL } from '../lib/season';
-import { isTedSchoolDay, isInTedPeriod } from '../lib/ted';
+import { isTedSchoolDay, isTedWeek } from '../lib/ted';
 
 const DAY_NL = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
 const DAY_FULL = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
@@ -38,14 +38,20 @@ interface Props {
   onCookMeal: (ingredientIds: string[]) => void;
   onAddRecipe: (recipe: Recipe) => void;
   onSetLunch: (date: string, value: 'boterham' | 'skip' | null) => void;
-  onOverrideTed: (date: string, value: boolean) => void;
+  onToggleTedWeek: (mondayStr: string, force: boolean) => void;
+  onSetTedReference: (wednesday: string) => void;
+  onResetTed: () => void;
 }
 
-export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, tedSchedule, onAssign, onNavigate, onAddToStock, onCookMeal, onAddRecipe, onSetLunch, onOverrideTed }: Props) {
-  const [picking, setPicking] = useState<string | null>(null); // date
+export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, tedSchedule, onAssign, onNavigate, onAddToStock, onCookMeal, onAddRecipe, onSetLunch, onToggleTedWeek, onSetTedReference, onResetTed }: Props) {
+  const [picking, setPicking] = useState<string | null>(null);
   const [detail, setDetail] = useState<Recipe | null>(null);
   const [showShopping, setShowShopping] = useState(false);
   const [cookedRecipe, setCookedRecipe] = useState<Recipe | null>(null);
+  const [showTedSetup, setShowTedSetup] = useState(false);
+
+  const mondayStr = weekStart.toISOString().slice(0, 10);
+  const tedThisWeek = isTedWeek(mondayStr, tedSchedule);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -68,6 +74,28 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
         <h2>{isoToDisplay(weekStart.toISOString().slice(0, 10))} – {weekEndStr}</h2>
         <button onClick={() => onNavigate(1)}>Volgende →</button>
         <button className="nav-today" onClick={() => onNavigate(0)}>Vandaag</button>
+        {/* Ted-week toggle */}
+        {tedSchedule.referenceWednesday ? (
+          <button
+            onClick={() => onToggleTedWeek(mondayStr, !tedThisWeek)}
+            title={tedThisWeek ? 'Ted-week — klik om over te slaan' : 'Geen Ted-week — klik om te forceren'}
+            style={{
+              padding: '.35rem .7rem', border: '1px solid', borderRadius: 6, cursor: 'pointer', fontSize: '.82rem',
+              background: tedThisWeek ? '#dbeafe' : 'var(--tag-bg)',
+              borderColor: tedThisWeek ? '#93c5fd' : 'var(--border)',
+              color: tedThisWeek ? '#1e40af' : 'var(--text-muted)',
+            }}
+          >
+            👦 {tedThisWeek ? 'Ted-week' : 'Geen Ted'}
+          </button>
+        ) : (
+          <button
+            onClick={() => setShowTedSetup(true)}
+            style={{ padding: '.35rem .7rem', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', fontSize: '.82rem', color: 'var(--text-muted)', background: 'var(--tag-bg)' }}
+          >
+            👦 Ted instellen
+          </button>
+        )}
         <button
           className="nav-shopping"
           onClick={() => setShowShopping(true)}
@@ -139,8 +167,8 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                 <div className="day-meal empty">Nog niets gepland</div>
               )}
 
-              {/* Lunch + Ted */}
-              {(effectiveLunch !== null || (tedSchedule.referenceWednesday && isInTedPeriod(day.date, tedSchedule))) && (
+              {/* Lunch + Ted indicators */}
+              {(effectiveLunch !== null || isTedSchoolDay(day.date, tedSchedule)) && (
                 <div style={{ display: 'flex', gap: '.35rem', flexWrap: 'wrap', alignItems: 'center' }}>
                   {effectiveLunch !== null && (
                     <button
@@ -156,26 +184,14 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                       {effectiveLunch === 'boterham' ? '🥪 Boterham' : '🥪 —'}
                     </button>
                   )}
-                  {tedSchedule.referenceWednesday && (() => {
-                    const isTed = isTedSchoolDay(day.date, tedSchedule);
-                    const inPeriod = isInTedPeriod(day.date, tedSchedule);
-                    const hasOverride = day.date in tedSchedule.overrides;
-                    if (!inPeriod && !hasOverride) return null;
-                    return (
-                      <button
-                        onClick={() => onOverrideTed(day.date, !isTed)}
-                        title={isTed ? 'Schoollunch Ted (klik voor uitzondering)' : 'Ted is er, geen schoollunch'}
-                        style={{
-                          fontSize: '.72rem', padding: '.15rem .45rem', borderRadius: 4, cursor: 'pointer', border: '1px solid',
-                          background: isTed ? '#dbeafe' : 'var(--tag-bg)',
-                          borderColor: isTed ? '#93c5fd' : 'var(--border)',
-                          color: isTed ? '#1e40af' : 'var(--text-muted)',
-                        }}
-                      >
-                        {isTed ? '👦 Ted' : '👦'}
-                      </button>
-                    );
-                  })()}
+                  {isTedSchoolDay(day.date, tedSchedule) && (
+                    <span style={{
+                      fontSize: '.72rem', padding: '.15rem .45rem', borderRadius: 4,
+                      background: '#dbeafe', border: '1px solid #93c5fd', color: '#1e40af',
+                    }}>
+                      👦 Ted
+                    </span>
+                  )}
                 </div>
               )}
 
@@ -194,6 +210,44 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
           );
         })}
       </div>
+
+      {showTedSetup && (
+        <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setShowTedSetup(false); }}>
+          <div className="modal" style={{ maxWidth: 420 }}>
+            <div className="modal-header">
+              <h2>👦 Ted-schema instellen</h2>
+              <button className="modal-close" onClick={() => setShowTedSetup(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <p className="text-muted" style={{ marginBottom: '1rem', fontSize: '.88rem' }}>
+                Geef de woensdag op waarop Ted voor het eerst aankomt. De app berekent daarna automatisch
+                alle Ted-weken (elke 2 weken). Schoollunch: do, vr, ma, di.
+              </p>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', fontSize: '.85rem', fontWeight: 600 }}>
+                Eerste aankomst (woensdag):
+                <input
+                  type="date"
+                  style={{ padding: '.4rem .6rem', border: '1px solid var(--border)', borderRadius: 6, fontSize: '.9rem' }}
+                  onChange={(e) => { if (e.target.value) { onSetTedReference(e.target.value); setShowTedSetup(false); } }}
+                />
+              </label>
+              {tedSchedule.referenceWednesday && (
+                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+                  <p className="text-muted" style={{ fontSize: '.82rem', marginBottom: '.5rem' }}>
+                    Huidig schema: Ted arriveert elke 2 weken vanaf <strong>{tedSchedule.referenceWednesday}</strong>.
+                  </p>
+                  <button
+                    onClick={() => { onResetTed(); setShowTedSetup(false); }}
+                    style={{ fontSize: '.82rem', padding: '.35rem .7rem', border: '1px solid #fca5a5', borderRadius: 5, cursor: 'pointer', background: 'none', color: '#c00' }}
+                  >
+                    Schema wissen
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {picking && (
         <MealPicker

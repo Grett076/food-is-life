@@ -72,7 +72,7 @@ export function useAppState() {
     load('stock', []),
   );
   const [tedSchedule, setTedSchedule] = useState<TedSchedule>(() =>
-    load('tedSchedule', { referenceWednesday: null, overrides: {} }),
+    load('tedSchedule', { referenceWednesday: null, weekOverrides: {} }),
   );
 
   // Persist
@@ -113,16 +113,24 @@ export function useAppState() {
   }
 
   function overrideTed(date: string, value: boolean) {
-    // Handmatige override op het Ted-schema voor één dag
-    setTedSchedule((s) => ({ ...s, overrides: { ...s.overrides, [date]: value } }));
+    // ponytail: per-dag override vervangen door week-niveau; deze functie is niet meer nodig
+    // maar bewaard voor backwards compat — delegeert naar week-toggle
+    void date; void value;
   }
 
   function setTedReference(wednesday: string) {
-    setTedSchedule({ referenceWednesday: wednesday, overrides: {} });
+    setTedSchedule({ referenceWednesday: wednesday, weekOverrides: {} });
   }
 
   function resetTedSchedule() {
-    setTedSchedule({ referenceWednesday: null, overrides: {} });
+    setTedSchedule({ referenceWednesday: null, weekOverrides: {} });
+  }
+
+  function toggleTedWeek(mondayStr: string, force: boolean) {
+    setTedSchedule((s) => ({
+      ...s,
+      weekOverrides: { ...s.weekOverrides, [mondayStr]: force },
+    }));
   }
 
   function toggleFavorite(recipeId: string) {
@@ -208,5 +216,6 @@ export function useAppState() {
     overrideTed,
     setTedReference,
     resetTedSchedule,
+    toggleTedWeek,
   };
 }

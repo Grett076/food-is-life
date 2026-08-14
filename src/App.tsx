@@ -76,7 +76,9 @@ export default function App() {
             onCookMeal={state.cookMeal}
             onAddRecipe={state.addRecipe}
             onSetLunch={state.setLunch}
-            onOverrideTed={state.overrideTed}
+            onToggleTedWeek={state.toggleTedWeek}
+            onSetTedReference={state.setTedReference}
+            onResetTed={state.resetTedSchedule}
           />
         )}
 
@@ -104,54 +106,6 @@ export default function App() {
             <p className="text-muted" style={{ marginBottom: '1.25rem' }}>
               Wat heb je in huis? Ingrediënten in voorraad scoren hoger in suggesties en worden afgestreept op de boodschappenlijst.
             </p>
-
-            {/* Ted-schema */}
-            <div style={{ background: '#dbeafe', border: '1px solid #93c5fd', borderRadius: 'var(--radius)', padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
-              <h3 style={{ fontSize: '.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.04em', color: '#1e40af', marginBottom: '.5rem' }}>
-                👦 Ted-schema
-              </h3>
-              {state.tedSchedule.referenceWednesday ? (
-                <div style={{ fontSize: '.88rem' }}>
-                  <p style={{ marginBottom: '.5rem' }}>
-                    Schema actief — Ted arriveert elke 2 weken vanaf <strong>{state.tedSchedule.referenceWednesday}</strong>.
-                    Schoollunch: do, vr, ma, di.
-                  </p>
-                  <p className="text-muted" style={{ marginBottom: '.75rem', fontSize: '.8rem' }}>
-                    Klik een dag in het weekrooster om een uitzondering te maken.
-                  </p>
-                  <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '.82rem', color: 'var(--text-muted)' }}>Wijzig referentiedatum:</span>
-                    <input
-                      type="date"
-                      style={{ padding: '.3rem .5rem', border: '1px solid #93c5fd', borderRadius: 5, fontSize: '.85rem' }}
-                      onChange={(e) => e.target.value && state.setTedReference(e.target.value)}
-                    />
-                    <button
-                      onClick={state.resetTedSchedule}
-                      style={{ fontSize: '.8rem', padding: '.3rem .65rem', border: '1px solid #fca5a5', borderRadius: 5, cursor: 'pointer', background: 'white', color: '#c00' }}
-                    >
-                      Schema wissen
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div style={{ fontSize: '.88rem' }}>
-                  <p className="text-muted" style={{ marginBottom: '.75rem' }}>
-                    Stel de eerste woensdag in waarop Ted arriveert. De app berekent daarna automatisch alle Ted-weken.
-                  </p>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '.5rem', fontSize: '.88rem' }}>
-                    Eerste aankomst (woensdag):
-                    <input
-                      type="date"
-                      style={{ padding: '.3rem .5rem', border: '1px solid #93c5fd', borderRadius: 5, fontSize: '.85rem' }}
-                      onChange={(e) => e.target.value && state.setTedReference(e.target.value)}
-                    />
-                  </label>
-                </div>
-              )}
-            </div>
-
-            {/* Zoekbalk */}
             <StockPanel
               ingredients={state.ingredients}
               stock={state.stock}
