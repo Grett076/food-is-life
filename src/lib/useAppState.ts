@@ -71,9 +71,14 @@ export function useAppState() {
   const [stock, setStock] = useState<string[]>(() =>
     load('stock', []),
   );
-  const [tedSchedule, setTedSchedule] = useState<TedSchedule>(() =>
-    load('tedSchedule', { referenceWednesday: null, weekOverrides: {} }),
-  );
+  const [tedSchedule, setTedSchedule] = useState<TedSchedule>(() => {
+    const stored = load<any>('tedSchedule', { referenceWednesday: null, weekOverrides: {} });
+    // Migreer oude 'overrides' key naar 'weekOverrides'
+    if (stored.overrides !== undefined && stored.weekOverrides === undefined) {
+      return { referenceWednesday: stored.referenceWednesday ?? null, weekOverrides: {} };
+    }
+    return { referenceWednesday: stored.referenceWednesday ?? null, weekOverrides: stored.weekOverrides ?? {} };
+  });
 
   // Persist
   useEffect(() => { save('recipes', recipes); }, [recipes]);
