@@ -52,8 +52,7 @@ export interface PlannedDay {
   date: string; // 'YYYY-MM-DD'
   recipeId: string | null;
   note?: string;
-  lunch?: 'boterham' | 'skip' | null; // null = weekend / niet relevant
-  tedSchool?: boolean; // Ted heeft schoollunch nodig deze dag
+  lunch?: 'boterham' | 'skip' | null;
 }
 
 export interface MealHistory {
@@ -61,14 +60,8 @@ export interface MealHistory {
   date: string; // 'YYYY-MM-DD'
 }
 
-export interface TedSchedule {
-  referenceWednesday: string | null;
-  /** Specifieke woensdagen die de auto-berekening overschrijven: true=forceer aankomst, false=sla over */
-  arrivalOverrides: Record<string, boolean>;
-}
-
 export interface Preferences {
-  excludedRecipes: string[]; // per recept: niet mijn ding
+  excludedRecipes: string[];
 }
 
 export interface AppState {

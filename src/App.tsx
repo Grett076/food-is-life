@@ -69,18 +69,12 @@ export default function App() {
             month={month}
             preferences={state.preferences}
             stock={state.stock}
-            tedSchedule={state.tedSchedule}
             onAssign={state.assignMeal}
             onNavigate={(delta) => delta === 0 ? state.goToCurrentWeek() : state.navigateWeek(delta)}
             onAddToStock={state.addToStock}
             onCookMeal={state.cookMeal}
             onAddRecipe={state.addRecipe}
             onSetLunch={state.setLunch}
-            onAddTedArrival={state.addTedArrival}
-            onSkipTedArrival={state.skipTedArrival}
-            onClearTedOverride={state.clearTedOverride}
-            onSetTedReference={state.setTedReference}
-            onResetTed={state.resetTedSchedule}
           />
         )}
 

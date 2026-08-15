@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import type { PlannedDay, MealHistory, Recipe, Ingredient, Preferences, TedSchedule } from '../types';
+import type { PlannedDay, MealHistory, Recipe, Ingredient, Preferences } from '../types';
 import { RECIPES } from '../data/recipes';
 import { INGREDIENTS } from '../data/ingredients';
 
-const DATA_VERSION = 11; // verhoog bij wijzigingen in seed-recepten of ingrediënten
+const DATA_VERSION = 12;
 
-/** Formatteer een Date als lokale YYYY-MM-DD string (niet UTC) */
 function localDateStr(d: Date): string {
   return [
     d.getFullYear(),
@@ -50,70 +49,43 @@ function save<T>(key: string, value: T): void {
 }
 
 export function useAppState() {
-  // Seed-data migratie: als versie verouderd is, reset recepten en ingrediënten
-  // maar bewaar gebruikersdata (geschiedenis, planning, voorraad, voorkeuren)
   const storedVersion = load<number>('dataVersion', 0);
   if (storedVersion < DATA_VERSION) {
     localStorage.setItem('recipes', JSON.stringify(RECIPES));
     localStorage.setItem('ingredients', JSON.stringify(INGREDIENTS));
     localStorage.setItem('dataVersion', String(DATA_VERSION));
+    localStorage.removeItem('tedSchedule');
   }
 
-  const [recipes, setRecipes] = useState<Recipe[]>(() =>
-    load('recipes', RECIPES),
-  );
-  const [ingredients, setIngredients] = useState<Ingredient[]>(() =>
-    load('ingredients', INGREDIENTS),
-  );
+  const [recipes, setRecipes] = useState<Recipe[]>(() => load('recipes', RECIPES));
+  const [ingredients, setIngredients] = useState<Ingredient[]>(() => load('ingredients', INGREDIENTS));
   const [weekStart, setWeekStart] = useState<Date>(() => getMonday(new Date()));
   const [week, setWeek] = useState<PlannedDay[]>(() => {
     const monday = getMonday(new Date());
-    const key = `week-${localDateStr(monday) }`;
-    return load(key, buildWeek(monday));
+    return load(`week-${localDateStr(monday)}`, buildWeek(monday));
   });
-  const [history, setHistory] = useState<MealHistory[]>(() =>
-    load('history', []),
-  );
+  const [history, setHistory] = useState<MealHistory[]>(() => load('history', []));
   const [preferences, setPreferences] = useState<Preferences>(() =>
     load('preferences', { excludedRecipes: [] }),
   );
-  const [stock, setStock] = useState<string[]>(() =>
-    load('stock', []),
-  );
-  const [tedSchedule, setTedSchedule] = useState<TedSchedule>(() => {
-    const stored = load<any>('tedSchedule', { referenceWednesday: null, arrivalOverrides: {} });
-    // Migreer oude weekOverrides/overrides naar arrivalOverrides (drop, niet te converteren)
-    return {
-      referenceWednesday: stored.referenceWednesday ?? null,
-      arrivalOverrides: stored.arrivalOverrides ?? {},
-    };
-  });
+  const [stock, setStock] = useState<string[]>(() => load('stock', []));
 
-  // Persist
   useEffect(() => { save('recipes', recipes); }, [recipes]);
   useEffect(() => { save('ingredients', ingredients); }, [ingredients]);
-  useEffect(() => {
-    const key = `week-${localDateStr(weekStart) }`;
-    save(key, week);
-  }, [week, weekStart]);
+  useEffect(() => { save(`week-${localDateStr(weekStart)}`, week); }, [week, weekStart]);
   useEffect(() => { save('history', history); }, [history]);
   useEffect(() => { save('preferences', preferences); }, [preferences]);
   useEffect(() => { save('stock', stock); }, [stock]);
-  useEffect(() => { save('tedSchedule', tedSchedule); }, [tedSchedule]);
 
   function navigateWeek(delta: number) {
     const next = new Date(weekStart);
     next.setDate(next.getDate() + delta * 7);
-    const key = `week-${localDateStr(next) }`;
     setWeekStart(next);
-    setWeek(load(key, buildWeek(next)));
+    setWeek(load(`week-${localDateStr(next)}`, buildWeek(next)));
   }
 
   function assignMeal(date: string, recipeId: string | null, note?: string) {
-    setWeek((w) =>
-      w.map((d) => (d.date === date ? { ...d, recipeId, note } : d)),
-    );
-    // Voeg toe aan geschiedenis als recept gekozen
+    setWeek((w) => w.map((d) => (d.date === date ? { ...d, recipeId, note } : d)));
     if (recipeId) {
       setHistory((h) => {
         const without = h.filter((e) => !(e.date === date && e.recipeId === recipeId));
@@ -126,70 +98,15 @@ export function useAppState() {
     setWeek((w) => w.map((d) => (d.date === date ? { ...d, lunch: value } : d)));
   }
 
-  function overrideTed(date: string, value: boolean) {
-    // ponytail: per-dag override vervangen door week-niveau; deze functie is niet meer nodig
-    // maar bewaard voor backwards compat — delegeert naar week-toggle
-    void date; void value;
-  }
-
-  function setTedReference(wednesday: string) {
-    setTedSchedule({ referenceWednesday: wednesday, arrivalOverrides: {} });
-  }
-
-  function resetTedSchedule() {
-    setTedSchedule({ referenceWednesday: null, arrivalOverrides: {} });
-  }
-
-  /** Forceer aankomst op een specifieke woensdag (ook als niet in schema) */
-  function addTedArrival(wednesdayStr: string) {
-    setTedSchedule((s) => ({
-      ...s,
-      arrivalOverrides: { ...s.arrivalOverrides, [wednesdayStr]: true },
-    }));
-  }
-
-  /** Sla een geplande aankomst over op een specifieke woensdag */
-  function skipTedArrival(wednesdayStr: string) {
-    setTedSchedule((s) => ({
-      ...s,
-      arrivalOverrides: { ...s.arrivalOverrides, [wednesdayStr]: false },
-    }));
-  }
-
-  /** Verwijder een override (herstel naar schema) */
-  function clearTedOverride(wednesdayStr: string) {
-    setTedSchedule((s) => {
-      const next = { ...s.arrivalOverrides };
-      delete next[wednesdayStr];
-      return { ...s, arrivalOverrides: next };
-    });
-  }
-
   function toggleFavorite(recipeId: string) {
-    setRecipes((rs) =>
-      rs.map((r) => (r.id === recipeId ? { ...r, favorite: !r.favorite } : r)),
-    );
+    setRecipes((rs) => rs.map((r) => (r.id === recipeId ? { ...r, favorite: !r.favorite } : r)));
   }
 
-  function addRecipe(recipe: Recipe) {
-    setRecipes((rs) => [...rs, recipe]);
-  }
-
-  function updateRecipe(recipe: Recipe) {
-    setRecipes((rs) => rs.map((r) => (r.id === recipe.id ? recipe : r)));
-  }
-
-  function deleteRecipe(id: string) {
-    setRecipes((rs) => rs.filter((r) => r.id !== id));
-  }
-
-  function updateIngredient(ingredient: Ingredient) {
-    setIngredients((is) => is.map((i) => (i.id === ingredient.id ? ingredient : i)));
-  }
-
-  function addIngredient(ingredient: Ingredient) {
-    setIngredients((is) => [...is, ingredient]);
-  }
+  function addRecipe(recipe: Recipe) { setRecipes((rs) => [...rs, recipe]); }
+  function updateRecipe(recipe: Recipe) { setRecipes((rs) => rs.map((r) => (r.id === recipe.id ? recipe : r))); }
+  function deleteRecipe(id: string) { setRecipes((rs) => rs.filter((r) => r.id !== id)); }
+  function updateIngredient(ingredient: Ingredient) { setIngredients((is) => is.map((i) => (i.id === ingredient.id ? ingredient : i))); }
+  function addIngredient(ingredient: Ingredient) { setIngredients((is) => [...is, ingredient]); }
 
   function toggleExcluded(recipeId: string) {
     setPreferences((p) => {
@@ -217,39 +134,18 @@ export function useAppState() {
 
   function goToCurrentWeek() {
     const monday = getMonday(new Date());
-    const key = `week-${localDateStr(monday) }`;
     setWeekStart(monday);
-    setWeek(load(key, buildWeek(monday)));
+    setWeek(load(`week-${localDateStr(monday)}`, buildWeek(monday)));
   }
 
   return {
-    recipes,
-    ingredients,
-    week,
-    weekStart,
-    history,
-    navigateWeek,
-    assignMeal,
-    toggleFavorite,
-    addRecipe,
-    updateRecipe,
-    deleteRecipe,
-    updateIngredient,
-    addIngredient,
+    recipes, ingredients, week, weekStart, history,
+    navigateWeek, assignMeal, toggleFavorite,
+    addRecipe, updateRecipe, deleteRecipe,
+    updateIngredient, addIngredient,
     goToCurrentWeek,
-    preferences,
-    toggleExcluded,
-    stock,
-    toggleStock,
-    addToStock,
-    cookMeal,
+    preferences, toggleExcluded,
+    stock, toggleStock, addToStock, cookMeal,
     setLunch,
-    tedSchedule,
-    overrideTed,
-    setTedReference,
-    resetTedSchedule,
-    addTedArrival,
-    skipTedArrival,
-    clearTedOverride,
   };
 }
