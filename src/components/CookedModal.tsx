@@ -81,14 +81,10 @@ export function CookedModal({ recipe, allIngredients, stock, onDeplete, onClose 
             </p>
           )}
 
-          <div style={{ display: 'flex', gap: '.75rem', justifyContent: 'flex-end' }}>
-            <button onClick={onClose}
-              style={{ padding: '.45rem 1rem', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', background: 'none', display: 'inline-flex', alignItems: 'center', gap: '.35rem' }}>
-              <i className="fi fi-rr-cross-small" /> Niets op
-            </button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button onClick={confirm}
               style={{ padding: '.45rem 1.1rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '.35rem' }}>
-              <i className="fi fi-rr-check" /> {depleted.size > 0 ? `${depleted.size} uit voorraad` : 'Klaar'}
+              <i className="fi fi-rr-check" /> {depleted.size > 0 ? `${depleted.size} uit voorraad` : 'Niets op'}
             </button>
           </div>
 

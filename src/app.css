@@ -115,6 +115,23 @@ main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; overflow
 }
 .day-card.weekend { background: var(--weekend-bg); border-color: var(--weekend-border); }
 .day-card.today { border-color: var(--accent); border-width: 2px; box-shadow: 0 0 0 3px var(--accent-light); }
+.day-card.cooked { opacity: .7; }
+.day-card.cooked .day-meal { text-decoration: line-through; color: var(--text-muted); }
+
+.cooked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-size: .78rem;
+  color: var(--accent);
+  font-weight: 600;
+  padding: .28rem .55rem;
+  border-radius: 5px;
+  background: var(--accent-light);
+  border: none;
+  cursor: pointer;
+}
+.cooked-badge:hover { filter: brightness(.92); }
 
 .day-label {
   font-size: .75rem;
