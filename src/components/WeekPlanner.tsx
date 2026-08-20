@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { PlannedDay, Recipe, Ingredient, MealHistory, Preferences } from '../types';
 import { MealPicker } from './MealPicker';
 import { RecipeDetail } from './RecipeDetail';
@@ -54,6 +54,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
   const [picking, setPicking] = useState<string | null>(null);
   const [detail, setDetail] = useState<Recipe | null>(null);
   const [cookedRecipe, setCookedRecipe] = useState<{ recipe: Recipe; date: string } | null>(null);
+  const touchStartX = useRef<number | null>(null);
 
   const today = localDateStr(new Date());
   const todayIndex = week.findIndex((d) => d.date === today);
@@ -107,7 +108,15 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
         </div>
       )}
 
-      <div className="week-grid">
+      <div className="week-grid"
+        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          if (touchStartX.current === null) return;
+          const delta = touchStartX.current - e.changedTouches[0].clientX;
+          if (Math.abs(delta) > 50) setActiveDayIndex((i) => Math.min(6, Math.max(0, i + (delta > 0 ? 1 : -1))));
+          touchStartX.current = null;
+        }}
+      >
         {/* Week strip — mobile only, rendered via CSS */}
         <div className="week-strip">
           {week.map((day, i) => {
