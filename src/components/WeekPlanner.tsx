@@ -104,7 +104,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
   const weekNum = isoWeek(weekStart);
 
   return (
-    <div>
+    <div className="planner-root">
       <div className="week-nav">
         <div />
         <div className="week-nav-center">
