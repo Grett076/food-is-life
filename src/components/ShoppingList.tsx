@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import type { PlannedDay, Recipe, Ingredient } from '../types';
+import type { PlannedDay, Recipe, Ingredient, MealHistory } from '../types';
+
+function localToday(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
 interface ShoppingItem {
   ingredientId: string;
@@ -12,14 +17,21 @@ interface Props {
   recipes: Recipe[];
   allIngredients: Ingredient[];
   stock: string[];
+  history: MealHistory[];
   onAddToStock: (ids: string[]) => void;
 }
 
-export function ShoppingList({ week, recipes, allIngredients, stock, onAddToStock }: Props) {
+export function ShoppingList({ week, recipes, allIngredients, stock, history, onAddToStock }: Props) {
+  const today = localToday();
+  const cookedSet = new Set(history.map((h) => `${h.date}|${h.recipeId}`));
+
+  // Only include days from today onward, and only if the meal hasn't been cooked yet
+  const relevantDays = week.filter((d) => d.date >= today && !(d.recipeId && cookedSet.has(`${d.date}|${d.recipeId}`)));
+
   const stockSet = new Set(stock);
   const needed = new Map<string, ShoppingItem>();
 
-  for (const day of week) {
+  for (const day of relevantDays) {
     if (!day.recipeId) continue;
     const recipe = recipes.find((r) => r.id === day.recipeId);
     if (!recipe) continue;
@@ -43,8 +55,8 @@ export function ShoppingList({ week, recipes, allIngredients, stock, onAddToStoc
     setChecked((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   }
 
-  const plannedCount = week.filter((d) => d.recipeId).length;
-  const boterhamDagen = week.filter((d) => d.lunch === 'boterham').length;
+  const plannedCount = relevantDays.filter((d) => d.recipeId).length;
+  const boterhamDagen = relevantDays.filter((d) => d.lunch === 'boterham').length;
 
   if (plannedCount === 0) {
     return <p className="text-muted">Geen recepten gepland deze week.</p>;
@@ -96,7 +108,7 @@ export function ShoppingList({ week, recipes, allIngredients, stock, onAddToStoc
         </div>
       )}
 
-      <UnlinkedNote week={week} recipes={recipes} />
+      <UnlinkedNote week={relevantDays} recipes={recipes} />
 
       {boterhamDagen > 0 && (
         <div style={{ marginTop: '1.25rem', padding: '1rem', background: 'var(--weekend-bg)', borderRadius: 8, border: '1px solid var(--weekend-border)' }}>

@@ -150,6 +150,7 @@ export default function App() {
               recipes={state.recipes}
               allIngredients={state.ingredients}
               stock={state.stock}
+              history={state.history}
               onAddToStock={state.addToStock}
             />
           </>
