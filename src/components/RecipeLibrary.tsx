@@ -111,9 +111,9 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
         ))}
         <button
           onClick={() => { setEditingRecipe(null); setShowForm(true); }}
-          style={{ marginLeft: 'auto', padding: '.4rem .9rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600, fontSize: '.88rem' }}
+          style={{ marginLeft: 'auto', padding: '.4rem .9rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600, fontSize: '.88rem', display: 'inline-flex', alignItems: 'center', gap: '.35rem', whiteSpace: 'nowrap' }}
         >
-          + Recept
+          <i className="fi fi-rr-plus" /> Recept
         </button>
       </div>
 

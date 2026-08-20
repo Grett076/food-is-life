@@ -163,7 +163,7 @@ export function RecipeForm({ existing, allIngredients, onSave, onClose }: Props)
                 </div>
               ))}
               <button onClick={() => setRecipeIngredients((rs) => [...rs, { name: '', amount: '' }])} style={addBtn}>
-                + Ingrediënt
+                <i className="fi fi-rr-plus" style={{ fontSize: '.8em' }} /> Ingrediënt
               </button>
             </div>
           </Field>
@@ -183,7 +183,7 @@ export function RecipeForm({ existing, allIngredients, onSave, onClose }: Props)
                 </div>
               ))}
               <button onClick={() => setSteps((ss) => [...ss, { text: '' }])} style={addBtn}>
-                + Stap
+                <i className="fi fi-rr-plus" style={{ fontSize: '.8em' }} /> Stap
               </button>
             </div>
           </Field>
@@ -207,7 +207,7 @@ export function RecipeForm({ existing, allIngredients, onSave, onClose }: Props)
                 </div>
               ))}
               <button onClick={() => setPrepTasks((ts) => [...ts, { title: '', relativeTime: '' }])} style={addBtn}>
-                + Taak
+                <i className="fi fi-rr-plus" style={{ fontSize: '.8em' }} /> Taak
               </button>
             </div>
           </Field>
@@ -240,12 +240,12 @@ export function RecipeForm({ existing, allIngredients, onSave, onClose }: Props)
 
           <div style={{ display: 'flex', gap: '.75rem', justifyContent: 'flex-end' }}>
             <button onClick={onClose}
-              style={{ padding: '.5rem 1rem', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', background: 'none' }}>
-              Annuleren
+              style={{ padding: '.5rem 1rem', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', background: 'none', display: 'inline-flex', alignItems: 'center', gap: '.35rem' }}>
+              <i className="fi fi-rr-cross-small" /> Annuleren
             </button>
             <button onClick={submit}
-              style={{ padding: '.5rem 1.25rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}>
-              {existing ? 'Opslaan' : 'Toevoegen'}
+              style={{ padding: '.5rem 1.25rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '.35rem' }}>
+              <i className="fi fi-rr-check" /> {existing ? 'Opslaan' : 'Toevoegen'}
             </button>
           </div>
 
@@ -281,4 +281,5 @@ const addBtn: React.CSSProperties = {
   alignSelf: 'flex-start', padding: '.3rem .65rem',
   cursor: 'pointer', border: '1px solid var(--border)',
   borderRadius: 5, background: 'var(--tag-bg)', fontSize: '.82rem',
+  display: 'inline-flex', alignItems: 'center', gap: '.3rem',
 };

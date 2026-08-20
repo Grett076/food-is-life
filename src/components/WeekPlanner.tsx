@@ -3,7 +3,6 @@ import type { PlannedDay, Recipe, Ingredient, MealHistory, Preferences } from '.
 import { MealPicker } from './MealPicker';
 import { RecipeDetail } from './RecipeDetail';
 import { CookedModal } from './CookedModal';
-import { ShoppingList } from './ShoppingList';
 import { seasonFit, SEASON_FIT_LABEL } from '../lib/season';
 
 const DAY_NL = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
@@ -14,6 +13,14 @@ function formatMinutes(m: number): string {
   const h = Math.floor(m / 60);
   const rem = m % 60;
   return rem > 0 ? `${h}u ${rem}m` : `${h}u`;
+}
+
+function isoWeek(d: Date): number {
+  const t = new Date(d);
+  t.setHours(0, 0, 0, 0);
+  t.setDate(t.getDate() + 3 - (t.getDay() + 6) % 7);
+  const w1 = new Date(t.getFullYear(), 0, 4);
+  return 1 + Math.round(((t.getTime() - w1.getTime()) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7);
 }
 
 function isoToDisplay(date: string): string {
@@ -37,19 +44,20 @@ interface Props {
   stock: string[];
   onAssign: (date: string, recipeId: string | null, note?: string) => void;
   onNavigate: (delta: number) => void;
-  onAddToStock: (ids: string[]) => void;
   onCookMeal: (ingredientIds: string[]) => void;
   onAddRecipe: (recipe: Recipe) => void;
   onSetLunch: (date: string, value: 'boterham' | 'skip' | null) => void;
 }
 
-export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, onAssign, onNavigate, onAddToStock, onCookMeal, onAddRecipe, onSetLunch }: Props) {
+export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, onAssign, onNavigate, onCookMeal, onAddRecipe, onSetLunch }: Props) {
   const [picking, setPicking] = useState<string | null>(null);
   const [detail, setDetail] = useState<Recipe | null>(null);
-  const [showShopping, setShowShopping] = useState(false);
   const [cookedRecipe, setCookedRecipe] = useState<Recipe | null>(null);
 
   const today = localDateStr(new Date());
+  const todayIndex = week.findIndex((d) => d.date === today);
+  const [activeDayIndex, setActiveDayIndex] = useState(todayIndex >= 0 ? todayIndex : 0);
+  const clampedActive = Math.min(activeDayIndex, week.length - 1);
   const weekEndStr = isoToDisplay(localDateStr(new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 6)));
 
   const weekendDays = week.filter((_, i) => i >= 5);
@@ -57,20 +65,26 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
     .map((d) => recipes.find((r) => r.id === d.recipeId))
     .filter((r): r is Recipe => !!r && !!r.prepTasks?.length);
 
+  const weekNum = isoWeek(weekStart);
+
   return (
     <div>
       <div className="week-nav">
-        <button onClick={() => onNavigate(-1)}>← Vorige</button>
-        <h2>{isoToDisplay(localDateStr(weekStart))} – {weekEndStr}</h2>
-        <button onClick={() => onNavigate(1)}>Volgende →</button>
-        <button className="nav-today" onClick={() => onNavigate(0)}>Vandaag</button>
-        <button
-          className="nav-shopping"
-          onClick={() => setShowShopping(true)}
-          style={{ padding: '.35rem .8rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '.85rem' }}
-        >
-          🛒 Boodschappenlijst
-        </button>
+        <div />
+        <div className="week-nav-center">
+          <button className="week-nav-btn" title="Vorige week" onClick={() => { onNavigate(-1); setActiveDayIndex(0); }}>&#8249;</button>
+          <div className="week-nav-label">
+            <div className="week-num">Week {weekNum}</div>
+            <h2>{isoToDisplay(localDateStr(weekStart))} – {weekEndStr}</h2>
+          </div>
+          <button className="week-nav-btn" title="Volgende week" onClick={() => { onNavigate(1); setActiveDayIndex(0); }}>&#8250;</button>
+        </div>
+        <div className="week-nav-right">
+          <button className="nav-today"
+            onClick={() => { onNavigate(0); setActiveDayIndex(todayIndex >= 0 ? todayIndex : 0); }}
+            style={{ padding: '.35rem .7rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', fontSize: '.85rem', display: 'inline-flex', alignItems: 'center', gap: '.35rem' }}
+          ><i className="fi fi-rr-calendar-day" />Vandaag</button>
+        </div>
       </div>
 
       {projectsThisWeekend.length > 0 && (
@@ -93,6 +107,30 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
       )}
 
       <div className="week-grid">
+        {/* Week strip — mobile only, rendered via CSS */}
+        <div className="week-strip">
+          {week.map((day, i) => {
+            const num = parseInt(day.date.split('-')[2], 10);
+            const hasMeal = !!(week[i].recipeId || week[i].note);
+            return (
+              <button
+                key={day.date}
+                onClick={() => setActiveDayIndex(i)}
+                className={[
+                  'week-strip-day',
+                  i === clampedActive ? 'is-active' : '',
+                  day.date === today ? 'is-today' : '',
+                  i >= 5 ? 'is-weekend' : '',
+                ].filter(Boolean).join(' ')}
+              >
+                <span className="strip-name">{DAY_NL[i]}</span>
+                <span className="strip-num">{num}</span>
+                <span className="strip-dot" style={{ visibility: hasMeal ? 'visible' : 'hidden' }} />
+              </button>
+            );
+          })}
+        </div>
+
         {week.map((day, i) => {
           const isWeekend = i >= 5;
           const isWorkday = i < 5;
@@ -103,7 +141,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
           const effectiveLunch = day.lunch !== undefined ? day.lunch : (isWorkday ? 'boterham' : null);
 
           return (
-            <div key={day.date} className={`day-card${isWeekend ? ' weekend' : ''}${isToday ? ' today' : ''}`}>
+            <div key={day.date} className={`day-card${isWeekend ? ' weekend' : ''}${isToday ? ' today' : ''}${i === clampedActive ? ' mobile-active' : ''}`}>
               <div>
                 <div className="day-label">
                   <span>{DAY_NL[i]}</span>
@@ -149,13 +187,18 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
 
               <div className="day-actions">
                 <button className="primary" onClick={() => setPicking(day.date)}>
+                  <i className={`fi ${recipe || day.note ? 'fi-rr-calendar-pen' : 'fi-rr-calendar-plus'}`} />
                   {recipe || day.note ? 'Wijzigen' : 'Plannen'}
                 </button>
                 {recipe && isPast && (
-                  <button onClick={() => setCookedRecipe(recipe)}>✓ Gekookt</button>
+                  <button onClick={() => setCookedRecipe(recipe)}>
+                    <i className="fi fi-rr-check" /> Gekookt
+                  </button>
                 )}
                 {(recipe || day.note) && (
-                  <button className="btn-secondary" onClick={() => onAssign(day.date, null, undefined)}>✕</button>
+                  <button className="btn-danger" onClick={() => onAssign(day.date, null, undefined)}>
+                    <i className="fi fi-rr-trash" />
+                  </button>
                 )}
               </div>
             </div>
@@ -197,17 +240,6 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
           stock={stock}
           onDeplete={(ids) => { onCookMeal(ids); setCookedRecipe(null); }}
           onClose={() => setCookedRecipe(null)}
-        />
-      )}
-
-      {showShopping && (
-        <ShoppingList
-          week={week}
-          recipes={recipes}
-          allIngredients={ingredients}
-          stock={stock}
-          onAddToStock={onAddToStock}
-          onClose={() => setShowShopping(false)}
         />
       )}
     </div>

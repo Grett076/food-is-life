@@ -46,8 +46,8 @@ export function IngredientEditor({ ingredients, onUpdate, onAdd, onClose, inline
           onKeyDown={(e) => e.key === 'Enter' && startNew()}
           style={{ flex: 1, minWidth: 160, padding: '.4rem .7rem', border: '1px solid var(--border)', borderRadius: 6, fontSize: '.9rem' }} />
         <button onClick={startNew}
-          style={{ padding: '.4rem .9rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
-          + Toevoegen
+          style={{ padding: '.4rem .9rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '.35rem' }}>
+          <i className="fi fi-rr-plus" /> Toevoegen
         </button>
       </div>
       <div style={{ overflowX: 'auto' }}>
@@ -73,8 +73,8 @@ export function IngredientEditor({ ingredients, onUpdate, onAdd, onClose, inline
                 </td>
                 <td style={{ padding: '.4rem .5rem' }}>
                   <button onClick={() => setEditing({ ...ing })}
-                    style={{ fontSize: '.78rem', padding: '.2rem .5rem', cursor: 'pointer', border: '1px solid var(--border)', borderRadius: 4, background: 'none' }}>
-                    Bewerken
+                    style={{ fontSize: '.78rem', padding: '.2rem .5rem', cursor: 'pointer', border: '1px solid var(--border)', borderRadius: 4, background: 'none', display: 'inline-flex', alignItems: 'center', gap: '.25rem' }}>
+                    <i className="fi fi-rr-pencil" style={{ fontSize: '.85em' }} /> Bewerken
                   </button>
                 </td>
               </tr>
@@ -149,15 +149,15 @@ function IngredientEditForm({ ingredient, onSave, onCancel }: {
         </div>
       </div>
       <div style={{ display: 'flex', gap: '.75rem', justifyContent: 'flex-end' }}>
-        <button onClick={onCancel} style={{ padding: '.45rem 1rem', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', background: 'none' }}>
-          Annuleren
+        <button onClick={onCancel} style={{ padding: '.45rem 1rem', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', background: 'none', display: 'inline-flex', alignItems: 'center', gap: '.35rem' }}>
+          <i className="fi fi-rr-cross-small" /> Annuleren
         </button>
         <button onClick={() => onSave({ ...ingredient, name: name.trim(),
           seasonStartMonth: start !== '' ? +start : undefined,
           seasonEndMonth: end !== '' ? +end : undefined,
           peakMonths: peak.size > 0 ? Array.from(peak).sort((a, b) => a - b) : undefined,
-        })} style={{ padding: '.45rem 1.25rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}>
-          Opslaan
+        })} style={{ padding: '.45rem 1.25rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '.35rem' }}>
+          <i className="fi fi-rr-check" /> Opslaan
         </button>
       </div>
     </div>

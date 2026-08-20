@@ -97,8 +97,8 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
             <h2 style={{ fontSize: '.95rem' }}>Maaltijd — {date}</h2>
             <div style={{ display: 'flex', gap: '.4rem', alignItems: 'center' }}>
               <button onClick={() => setShowForm(true)}
-                style={{ fontSize: '.78rem', padding: '.25rem .55rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 5, cursor: 'pointer' }}>
-                + Recept
+                style={{ fontSize: '.78rem', padding: '.25rem .55rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 5, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '.3rem' }}>
+                <i className="fi fi-rr-plus" /> Recept
               </button>
               <button className="modal-close" onClick={onClose}>×</button>
             </div>
@@ -175,9 +175,9 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
                   <button
                     onClick={() => { if (note) { onPick(null, note); onClose(); } }}
                     disabled={!note}
-                    style={{ padding: '.4rem .85rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '.9rem' }}
+                    style={{ padding: '.4rem .85rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '.9rem', display: 'inline-flex', alignItems: 'center', gap: '.35rem' }}
                   >
-                    Opslaan
+                    <i className="fi fi-rr-check" /> Opslaan
                   </button>
                 </div>
               )}

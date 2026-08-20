@@ -1,4 +1,5 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
 
 :root {
   --bg: #f7f5f0;
@@ -25,7 +26,7 @@ body {
 }
 
 /* Layout */
-.app { display: grid; grid-template-rows: auto 1fr; min-height: 100vh; }
+.app { display: grid; grid-template-rows: auto 1fr; position: fixed; inset: 0; overflow: hidden; }
 
 header {
   background: #1a3d2b;
@@ -34,6 +35,7 @@ header {
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  position: relative;
 }
 header h1 { font-size: 1.1rem; font-weight: 700; color: #c8e6d4; letter-spacing: .01em; }
 nav { display: flex; gap: .25rem; }
@@ -50,7 +52,7 @@ nav button {
 nav button:hover { background: rgba(255,255,255,.1); color: #c8e6d4; }
 nav button.active { background: var(--accent); color: white; }
 
-main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
+main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; min-height: 0; }
 
 /* Sections */
 .section-title {
@@ -61,20 +63,34 @@ main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
 
 /* Week planner */
 .week-nav {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 1rem;
+  gap: .5rem;
   margin-bottom: 1.25rem;
 }
-.week-nav button {
+.week-nav-center { display: flex; align-items: center; gap: .6rem; }
+.week-nav-right  { display: flex; justify-content: flex-end; align-items: center; gap: .4rem; }
+.week-nav-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: .35rem .7rem;
   cursor: pointer;
-  font-size: .85rem;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text);
+  flex-shrink: 0;
+  transition: background .12s, border-color .12s, color .12s;
 }
-.week-nav h2 { font-size: 1rem; font-weight: 600; }
+.week-nav-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.week-nav-label { flex: 1; text-align: center; }
+.week-nav-label .week-num {
+  font-size: .68rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-muted);
+}
+.week-nav-label h2 { font-size: 1rem; font-weight: 600; margin: 0; white-space: nowrap; }
 
 .week-grid {
   display: grid;
@@ -120,15 +136,21 @@ main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
 
 .day-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
 .day-actions button {
+  display: inline-flex; align-items: center; gap: .3rem;
   font-size: .75rem;
-  padding: .25rem .55rem;
+  padding: .3rem .6rem;
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: 6px;
   background: var(--surface);
   cursor: pointer;
+  min-height: 36px;
+  transition: background .12s, border-color .12s;
 }
 .day-actions button:hover { background: var(--tag-bg); }
 .day-actions button.primary { background: var(--accent); color: white; border-color: var(--accent); }
+.day-actions button.primary:hover { background: #235c42; }
+.day-actions button.btn-danger { color: #b91c1c; border-color: #fca5a5; }
+.day-actions button.btn-danger:hover { background: #fee2e2; }
 
 .season-badge {
   display: inline-block;
@@ -364,68 +386,169 @@ main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
 .mt-sm { margin-top: .5rem; }
 .text-muted { color: var(--text-muted); font-size: .82rem; }
 
+/* ─── Tab bar (mobile only) ─────────────────────────────────────────────── */
+.tab-bar { display: none; }
+.week-strip { display: none; }
+
 /* ─── Responsive ────────────────────────────────────────────────────────── */
+@keyframes slideUp {
+  from { transform: translateY(20%); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
 @media (max-width: 640px) {
 
-  /* Header */
+  /* App shell — fixed handled by base styles */
+
+  /* Header — minimal, nav moves to tab bar */
   header {
     flex-wrap: wrap;
     padding: .6rem 1rem;
     gap: .4rem .75rem;
   }
   header h1 { font-size: 1rem; }
-  nav button { padding: .35rem .6rem; font-size: .82rem; }
-  .header-season { display: none; } /* verberg seizoenlabel op mobiel */
+  header nav { display: none; }
+  .header-season { display: none; }
   .header-actions { margin-left: auto; }
 
-  /* Main */
-  main { padding: .85rem; }
-
-  /* Week nav */
-  .week-nav {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    grid-template-rows: auto auto;
-    gap: .4rem;
-    align-items: center;
+  /* Main — space for fixed tab bar, clip any child overflow */
+  main {
+    padding: .85rem;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    overflow-x: clip;
   }
-  .week-nav h2 { text-align: center; font-size: .88rem; }
-  .week-nav .nav-today { grid-column: 1; grid-row: 2; }
-  .week-nav .nav-shopping { grid-column: 2 / 4; grid-row: 2; justify-self: end; }
 
-  /* Dag kaarten — compact horizontal op mobiel */
-  .week-grid { gap: .4rem; }
-  .day-card {
-    flex-direction: row;
+  /* ─ Tab bar ─ */
+  .tab-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #1a3d2b;
+    border-top: 1px solid rgba(255,255,255,.08);
+    z-index: 200;
+    padding: .35rem 0 max(.35rem, env(safe-area-inset-bottom, 0px));
+  }
+  .tab-bar button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    min-height: unset;
-    padding: .65rem .85rem;
+    gap: .15rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(138, 171, 149, .6);
+    padding: .25rem 0;
+    transition: color .15s;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tab-bar button .tab-icon { font-size: 1.3rem; line-height: 1; }
+  .tab-bar button .tab-label { font-size: .58rem; font-weight: 500; letter-spacing: .01em; }
+  .tab-bar button.active { color: #c8e6d4; }
+
+  /* Week nav — same 3-col grid, smaller on mobile */
+  .week-nav { gap: .3rem; margin-bottom: .75rem; }
+  .week-nav-center { gap: .3rem; }
+  .week-nav-label .week-num { font-size: .62rem; }
+  .week-nav-label h2 { font-size: .82rem; }
+  .week-nav-btn { width: 30px; height: 30px; font-size: .9rem; }
+  .nav-today { font-size: .75rem; padding: .28rem .5rem; }
+
+  /* ─ Week strip ─ */
+  .week-strip {
+    display: flex;
+    gap: .2rem;
+    margin: 0 -.85rem .75rem;
+    padding: .5rem .85rem .6rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .week-strip-day {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .1rem;
+    padding: .45rem .15rem;
+    border-radius: 10px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .12s;
+  }
+  .strip-name {
+    font-size: .6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-muted);
+  }
+  .strip-num {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .strip-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: .1rem;
+  }
+  /* today */
+  .week-strip-day.is-today:not(.is-active) .strip-num { color: var(--accent); }
+  /* weekend */
+  .week-strip-day.is-weekend:not(.is-active) .strip-name { color: #9a7a30; }
+  .week-strip-day.is-weekend:not(.is-active) .strip-num  { color: #7a5800; }
+  /* active */
+  .week-strip-day.is-active {
+    background: var(--accent);
+  }
+  .week-strip-day.is-active .strip-name,
+  .week-strip-day.is-active .strip-num { color: white; }
+  .week-strip-day.is-active .strip-dot { background: rgba(255,255,255,.7); }
+  .week-strip-day.is-active.is-weekend { background: var(--weekend-border); }
+
+  /* ─ Week grid — only active card visible ─ */
+  .week-grid { display: contents; }
+  .day-card { display: none; }
+  .day-card.mobile-active {
+    display: flex;
+    flex-direction: column;
+    min-height: 260px;
     gap: .75rem;
+    padding: 1.25rem;
   }
-  .day-card .day-date { display: none; }
-  .day-card .day-meta { display: none; }
-  .day-card .day-season { display: none; }
-  .day-label {
-    font-size: .7rem;
-    min-width: 26px;
-    line-height: 1.3;
-  }
-  .day-label-full { display: none; } /* verberg lange naam */
-  .day-meal { font-size: .88rem; }
-  .day-actions .btn-secondary { display: none; } /* verberg ✕ op mobiel */
 
-  /* Modals — bottom sheet op mobiel */
+  /* Modals — native bottom sheet */
   .modal-backdrop {
     padding: 0;
     align-items: flex-end;
   }
   .modal {
-    border-radius: var(--radius) var(--radius) 0 0;
+    border-radius: 20px 20px 0 0;
     max-width: 100%;
     max-height: 92vh;
+    animation: slideUp .22s ease-out;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  /* Drag handle */
+  .modal::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(0,0,0,.12);
+    margin: 12px auto 0;
   }
 
-  /* Library filters — scrollbaar */
+  /* Library filters — horizontaal scrollbaar */
   .library-controls {
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -439,9 +562,12 @@ main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
   }
   .filter-btn { white-space: nowrap; flex-shrink: 0; }
 
-  /* Recipe grid — 1 kolom onder 480px */
+  /* Recipe grid — 1 kolom */
   .recipe-grid { grid-template-columns: 1fr; }
 
-  /* Recept form grid aanpassingen */
+  /* Recept form */
   .recipe-form-times { grid-template-columns: 1fr 1fr !important; }
+
+  /* Touch targets */
+  .day-actions button { min-height: 44px; padding: .5rem .75rem; font-size: .82rem; }
 }

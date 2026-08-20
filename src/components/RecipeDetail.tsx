@@ -45,14 +45,14 @@ export function RecipeDetail({ recipe, allIngredients, history, month, onEdit, o
           <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
             {onEdit && (
               <button onClick={() => onEdit(recipe)}
-                style={{ fontSize: '.8rem', padding: '.3rem .65rem', border: '1px solid var(--border)', borderRadius: 5, cursor: 'pointer', background: 'none' }}>
-                Bewerken
+                style={{ fontSize: '.8rem', padding: '.3rem .65rem', border: '1px solid var(--border)', borderRadius: 5, cursor: 'pointer', background: 'none', display: 'inline-flex', alignItems: 'center', gap: '.3rem' }}>
+                <i className="fi fi-rr-pencil" /> Bewerken
               </button>
             )}
             {onDelete && (
               <button onClick={() => onDelete(recipe.id)}
-                style={{ fontSize: '.8rem', padding: '.3rem .65rem', border: '1px solid #fcc', borderRadius: 5, cursor: 'pointer', background: 'none', color: '#c00' }}>
-                Verwijderen
+                style={{ fontSize: '.8rem', padding: '.3rem .65rem', border: '1px solid #fcc', borderRadius: 5, cursor: 'pointer', background: 'none', color: '#c00', display: 'inline-flex', alignItems: 'center', gap: '.3rem' }}>
+                <i className="fi fi-rr-trash" /> Verwijderen
               </button>
             )}
             <button className="modal-close" onClick={onClose}>×</button>
