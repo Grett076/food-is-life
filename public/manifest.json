@@ -1,0 +1,13 @@
+{
+  "name": "Food is Life",
+  "short_name": "Food",
+  "description": "Weekplanner voor avondeten",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f5f0",
+  "theme_color": "#1a3d2b",
+  "lang": "nl",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

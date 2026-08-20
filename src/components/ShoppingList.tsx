@@ -13,10 +13,9 @@ interface Props {
   allIngredients: Ingredient[];
   stock: string[];
   onAddToStock: (ids: string[]) => void;
-  onClose: () => void;
 }
 
-export function ShoppingList({ week, recipes, allIngredients, stock, onAddToStock, onClose }: Props) {
+export function ShoppingList({ week, recipes, allIngredients, stock, onAddToStock }: Props) {
   const stockSet = new Set(stock);
   const needed = new Map<string, ShoppingItem>();
 
@@ -47,89 +46,81 @@ export function ShoppingList({ week, recipes, allIngredients, stock, onAddToStoc
   const plannedCount = week.filter((d) => d.recipeId).length;
   const boterhamDagen = week.filter((d) => d.lunch === 'boterham').length;
 
+  if (plannedCount === 0) {
+    return <p className="text-muted">Geen recepten gepland deze week.</p>;
+  }
+
   return (
-    <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal" style={{ maxWidth: 560 }}>
-        <div className="modal-header">
-          <h2>Boodschappenlijst</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
+    <div>
+      <p className="text-muted" style={{ marginBottom: '1rem', fontSize: '.85rem' }}>
+        Op basis van {plannedCount} geplande maaltijd{plannedCount !== 1 ? 'en' : ''} deze week.
+      </p>
+
+      {toBuy.length > 0 ? (
+        <div style={{ marginBottom: '1.25rem' }}>
+          <h3 style={sh}>Nog te kopen ({toBuy.length})</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '.3rem' }}>
+            {toBuy.sort((a, b) => a.ingredientName.localeCompare(b.ingredientName)).map((item) => (
+              <label key={item.ingredientId} style={{
+                display: 'flex', alignItems: 'flex-start', gap: '.75rem', padding: '.45rem .5rem',
+                borderRadius: 6, background: checked.has(item.ingredientId) ? '#f0fdf4' : 'var(--tag-bg)', cursor: 'pointer',
+              }}>
+                <input type="checkbox" checked={checked.has(item.ingredientId)} onChange={() => toggleChecked(item.ingredientId)} style={{ marginTop: '.15rem', flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  <span style={{ fontWeight: 500, fontSize: '.9rem', textDecoration: checked.has(item.ingredientId) ? 'line-through' : 'none', color: checked.has(item.ingredientId) ? 'var(--text-muted)' : 'var(--text)' }}>
+                    {item.ingredientName}
+                  </span>
+                  <div style={{ fontSize: '.75rem', color: 'var(--text-muted)', marginTop: '.1rem' }}>
+                    {item.entries.map((e, i) => <span key={i}>{i > 0 && ' · '}{e.amount && <b>{e.amount} </b>}voor {e.recipeName}</span>)}
+                  </div>
+                </div>
+              </label>
+            ))}
+          </div>
         </div>
-        <div className="modal-body">
-          {plannedCount === 0 ? (
-            <p className="text-muted">Geen recepten gepland deze week.</p>
-          ) : (
-            <>
-              <p className="text-muted" style={{ marginBottom: '1rem', fontSize: '.85rem' }}>
-                Op basis van {plannedCount} geplande maaltijd{plannedCount !== 1 ? 'en' : ''} deze week.
-              </p>
+      ) : (
+        <p style={{ color: '#15803d', fontWeight: 600, marginBottom: '1rem', fontSize: '.9rem' }}>✓ Je hebt alles al in huis.</p>
+      )}
 
-              {toBuy.length > 0 ? (
-                <div style={{ marginBottom: '1.25rem' }}>
-                  <h3 style={sh}>Nog te kopen ({toBuy.length})</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '.3rem' }}>
-                    {toBuy.sort((a, b) => a.ingredientName.localeCompare(b.ingredientName)).map((item) => (
-                      <label key={item.ingredientId} style={{
-                        display: 'flex', alignItems: 'flex-start', gap: '.75rem', padding: '.45rem .5rem',
-                        borderRadius: 6, background: checked.has(item.ingredientId) ? '#f0fdf4' : 'var(--tag-bg)', cursor: 'pointer',
-                      }}>
-                        <input type="checkbox" checked={checked.has(item.ingredientId)} onChange={() => toggleChecked(item.ingredientId)} style={{ marginTop: '.15rem', flexShrink: 0 }} />
-                        <div style={{ flex: 1 }}>
-                          <span style={{ fontWeight: 500, fontSize: '.9rem', textDecoration: checked.has(item.ingredientId) ? 'line-through' : 'none', color: checked.has(item.ingredientId) ? 'var(--text-muted)' : 'var(--text)' }}>
-                            {item.ingredientName}
-                          </span>
-                          <div style={{ fontSize: '.75rem', color: 'var(--text-muted)', marginTop: '.1rem' }}>
-                            {item.entries.map((e, i) => <span key={i}>{i > 0 && ' · '}{e.amount && <b>{e.amount} </b>}voor {e.recipeName}</span>)}
-                          </div>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <p style={{ color: '#15803d', fontWeight: 600, marginBottom: '1rem', fontSize: '.9rem' }}>✓ Je hebt alles al in huis.</p>
-              )}
-
-              {alreadyHave.length > 0 && (
-                <div style={{ marginBottom: '1.25rem' }}>
-                  <h3 style={sh}>In huis — controleer hoeveel ({alreadyHave.length})</h3>
-                  <p style={{ fontSize: '.78rem', color: 'var(--text-muted)', marginBottom: '.5rem' }}>Je hebt dit in huis, maar of je genoeg hebt weet de app niet.</p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.3rem' }}>
-                    {alreadyHave.sort((a, b) => a.ingredientName.localeCompare(b.ingredientName)).map((item) => (
-                      <span key={item.ingredientId} style={{ padding: '.2rem .55rem', borderRadius: 5, fontSize: '.82rem', background: '#fef9c3', color: '#854d0e', border: '1px solid #fde68a' }}>
-                        ⚠ {item.ingredientName}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <UnlinkedNote week={week} recipes={recipes} />
-
-              {boterhamDagen > 0 && (
-                <div style={{ marginTop: '1.25rem', padding: '1rem', background: 'var(--weekend-bg)', borderRadius: 8, border: '1px solid var(--weekend-border)' }}>
-                  <h3 style={{ ...sh, color: '#7a5800', marginBottom: '.5rem' }}>🥪 Lunch — {boterhamDagen} dag{boterhamDagen !== 1 ? 'en' : ''}</h3>
-                  <div style={{ fontSize: '.85rem', display: 'flex', flexDirection: 'column', gap: '.2rem' }}>
-                    <span>Brood — {boterhamDagen * 2} sneden</span>
-                    <span>Ham — {boterhamDagen * 2} plakken</span>
-                    <span>Kaas — {boterhamDagen * 2} plakken</span>
-                    <span>Komkommer — {boterhamDagen <= 2 ? '½' : boterhamDagen <= 4 ? '1' : '1½'}</span>
-                  </div>
-                </div>
-              )}
-
-              {checked.size > 0 && (
-                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '.75rem', alignItems: 'center' }}>
-                  <span className="text-muted">{checked.size} afgevinkt</span>
-                  <button onClick={() => { onAddToStock(Array.from(checked)); onClose(); }}
-                    style={{ padding: '.45rem 1.1rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}>
-                    Zet in voorraad & sluit
-                  </button>
-                </div>
-              )}
-            </>
-          )}
+      {alreadyHave.length > 0 && (
+        <div style={{ marginBottom: '1.25rem' }}>
+          <h3 style={sh}>In huis — controleer hoeveel ({alreadyHave.length})</h3>
+          <p style={{ fontSize: '.78rem', color: 'var(--text-muted)', marginBottom: '.5rem' }}>Je hebt dit in huis, maar of je genoeg hebt weet de app niet.</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.3rem' }}>
+            {alreadyHave.sort((a, b) => a.ingredientName.localeCompare(b.ingredientName)).map((item) => (
+              <span key={item.ingredientId} style={{ padding: '.2rem .55rem', borderRadius: 5, fontSize: '.82rem', background: '#fef9c3', color: '#854d0e', border: '1px solid #fde68a' }}>
+                ⚠ {item.ingredientName}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      <UnlinkedNote week={week} recipes={recipes} />
+
+      {boterhamDagen > 0 && (
+        <div style={{ marginTop: '1.25rem', padding: '1rem', background: 'var(--weekend-bg)', borderRadius: 8, border: '1px solid var(--weekend-border)' }}>
+          <h3 style={{ ...sh, color: '#7a5800', marginBottom: '.5rem' }}>🥪 Lunch — {boterhamDagen} dag{boterhamDagen !== 1 ? 'en' : ''}</h3>
+          <div style={{ fontSize: '.85rem', display: 'flex', flexDirection: 'column', gap: '.2rem' }}>
+            <span>Brood — {boterhamDagen * 2} sneden</span>
+            <span>Ham — {boterhamDagen * 2} plakken</span>
+            <span>Kaas — {boterhamDagen * 2} plakken</span>
+            <span>Komkommer — {boterhamDagen <= 2 ? '½' : boterhamDagen <= 4 ? '1' : '1½'}</span>
+          </div>
+        </div>
+      )}
+
+      {checked.size > 0 && (
+        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '.75rem', alignItems: 'center' }}>
+          <span className="text-muted">{checked.size} afgevinkt</span>
+          <button
+            onClick={() => onAddToStock(Array.from(checked))}
+            style={{ padding: '.45rem 1.1rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '.4rem' }}
+          >
+            <i className="fi fi-rr-basket" /> In voorraad
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -42,6 +42,7 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
   const [showForm, setShowForm] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
   const [detailRecipe, setDetailRecipe] = useState<Recipe | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   function toggleStyle(s: string) {
     setStyleFilters((prev) => {
@@ -73,7 +74,7 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
   }
 
   function handleDelete(id: string) {
-    if (confirm('Recept verwijderen?')) onDelete(id);
+    setConfirmDeleteId(id);
   }
 
   return (
@@ -111,9 +112,9 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
         ))}
         <button
           onClick={() => { setEditingRecipe(null); setShowForm(true); }}
-          style={{ marginLeft: 'auto', padding: '.4rem .9rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600, fontSize: '.88rem' }}
+          style={{ marginLeft: 'auto', padding: '.4rem .9rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600, fontSize: '.88rem', display: 'inline-flex', alignItems: 'center', gap: '.35rem', whiteSpace: 'nowrap' }}
         >
-          + Recept
+          <i className="fi fi-rr-plus" /> Recept
         </button>
       </div>
 
@@ -154,9 +155,22 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
           history={history}
           month={month}
           onEdit={(r) => { setDetailRecipe(null); setEditingRecipe(r); }}
-          onDelete={(id) => { setDetailRecipe(null); handleDelete(id); }}
+          onDelete={(id) => { handleDelete(id); }}
           onClose={() => setDetailRecipe(null)}
         />
+      )}
+      {confirmDeleteId && (
+        <div className="modal-backdrop" onClick={() => setConfirmDeleteId(null)}>
+          <div className="modal" style={{ maxWidth: 320 }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-body" style={{ textAlign: 'center', padding: '1.5rem' }}>
+              <p style={{ marginBottom: '1.25rem', fontWeight: 600 }}>Recept verwijderen?</p>
+              <div style={{ display: 'flex', gap: '.75rem', justifyContent: 'center' }}>
+                <button className="btn-secondary" onClick={() => setConfirmDeleteId(null)}>Annuleren</button>
+                <button className="btn-danger" onClick={() => { onDelete(confirmDeleteId); setConfirmDeleteId(null); setDetailRecipe(null); }}>Verwijderen</button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

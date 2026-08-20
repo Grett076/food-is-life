@@ -4,16 +4,23 @@ import { useAppState } from './lib/useAppState';
 import { WeekPlanner } from './components/WeekPlanner';
 import { RecipeLibrary } from './components/RecipeLibrary';
 import { IngredientEditor } from './components/IngredientEditor';
+import { ShoppingList } from './components/ShoppingList';
 import { currentSeasonLabel } from './lib/season';
 import { exportData, importData } from './lib/backup';
 
-type View = 'planner' | 'library' | 'voorraad' | 'ingredients';
+type View = 'planner' | 'library' | 'voorraad' | 'ingredients' | 'shopping' | 'settings';
 
 export default function App() {
   const [view, setView] = useState<View>('planner');
   const state = useAppState();
   const month = new Date().getMonth() + 1;
   const importRef = useRef<HTMLInputElement>(null);
+  const prevView = useRef<View>('planner');
+
+  function openSettings() {
+    if (view !== 'settings') prevView.current = view;
+    setView('settings');
+  }
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -29,7 +36,7 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <h1>🍽 Food is Life</h1>
+        <h1><i className="fi fi-rr-utensils" style={{ marginRight: '.4rem', fontSize: '.95em', verticalAlign: 'middle' }} />Food is Life</h1>
         <nav>
           <button className={view === 'planner' ? 'active' : ''} onClick={() => setView('planner')}>
             Weekplanning
@@ -43,19 +50,29 @@ export default function App() {
           <button className={view === 'ingredients' ? 'active' : ''} onClick={() => setView('ingredients')}>
             Ingrediënten
           </button>
+          <button className={view === 'shopping' ? 'active' : ''} onClick={() => setView('shopping')}>
+            Boodschappen
+          </button>
         </nav>
-        <span className="text-muted header-season" style={{ marginLeft: 'auto' }}>
+        <span className="text-muted header-season">
           {currentSeasonLabel(month)}
         </span>
-        <div className="header-actions" style={{ display: 'flex', gap: '.4rem' }}>
-          <button onClick={exportData} style={headerBtn} title="Exporteer alle data als JSON">
-            ↓ Backup
-          </button>
-          <label style={{ ...headerBtn, cursor: 'pointer' }} title="Importeer een backup">
-            ↑ Herstel
-            <input ref={importRef} type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
-          </label>
-        </div>
+        <button
+          onClick={openSettings}
+          title="Instellingen"
+          style={{
+            position: 'absolute', right: '1.25rem',
+            width: 34, height: 34, borderRadius: '50%',
+            background: view === 'settings' ? 'rgba(255,255,255,.25)' : 'rgba(255,255,255,.12)',
+            border: '1.5px solid rgba(255,255,255,.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '1.1rem', cursor: 'pointer', lineHeight: 1, flexShrink: 0,
+            color: '#c8e6d4',
+          }}
+        >
+          <i className="fi fi-rr-circle-user" style={{ display: 'block', lineHeight: 1 }} />
+        </button>
+        <input ref={importRef} type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
       </header>
 
       <main>
@@ -71,7 +88,6 @@ export default function App() {
             stock={state.stock}
             onAssign={state.assignMeal}
             onNavigate={(delta) => delta === 0 ? state.goToCurrentWeek() : state.navigateWeek(delta)}
-            onAddToStock={state.addToStock}
             onCookMeal={state.cookMeal}
             onAddRecipe={state.addRecipe}
             onSetLunch={state.setLunch}
@@ -125,10 +141,116 @@ export default function App() {
             />
           </>
         )}
+        {view === 'shopping' && (
+          <>
+            <div className="section-title">Boodschappenlijst</div>
+            <ShoppingList
+              week={state.week}
+              recipes={state.recipes}
+              allIngredients={state.ingredients}
+              stock={state.stock}
+              onAddToStock={state.addToStock}
+            />
+          </>
+        )}
+
+        {view === 'settings' && (
+          <SettingsPanel
+            onBack={() => setView(prevView.current)}
+            onExport={exportData}
+            onImport={() => importRef.current?.click()}
+          />
+        )}
       </main>
+
+      <nav className="tab-bar" role="tablist">
+        {([
+          { id: 'planner',     icon: 'fi-rr-calendar',       label: 'Planning' },
+          { id: 'library',     icon: 'fi-rr-recipe-book',     label: 'Recepten' },
+          { id: 'shopping',    icon: 'fi-rr-shopping-cart',   label: 'Boodschappen' },
+          { id: 'voorraad',    icon: 'fi-rr-basket',          label: 'Voorraad' },
+          { id: 'ingredients', icon: 'fi-rr-leaf',            label: 'Ingrediënten' },
+        ] as const).map((tab) => (
+          <button
+            key={tab.id}
+            role="tab"
+            aria-selected={view === tab.id}
+            className={view === tab.id ? 'active' : ''}
+            onClick={() => setView(tab.id)}
+          >
+            <span className="tab-icon"><i className={`fi ${tab.icon}`} /></span>
+            <span className="tab-label">{tab.label}</span>
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }
+
+// ── Settings ──────────────────────────────────────────────────────────────
+function SettingsPanel({ onBack, onExport, onImport }: {
+  onBack: () => void;
+  onExport: () => void;
+  onImport: () => void;
+}) {
+  return (
+    <div style={{ maxWidth: 420 }}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '.9rem', marginBottom: '1.5rem', padding: 0, display: 'inline-flex', alignItems: 'center', gap: '.35rem' }}>
+        <i className="fi fi-rr-arrow-left" /> Terug
+      </button>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+        <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--accent-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: 'var(--accent)' }}>
+          <i className="fi fi-rr-circle-user" />
+        </div>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: '1rem' }}>Gebruiker</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: '.85rem' }}>Lokaal account</div>
+        </div>
+      </div>
+
+      <section style={{ marginBottom: '1.75rem' }}>
+        <h2 style={sh}>Gegevens</h2>
+        <div style={settingsRow}>
+          <span>Naam</span>
+          <input defaultValue="Gebruiker" style={settingsInput} />
+        </div>
+      </section>
+
+      <section style={{ marginBottom: '1.75rem' }}>
+        <h2 style={sh}>Back-up &amp; herstel</h2>
+        <div style={{ display: 'flex', gap: '.75rem', flexWrap: 'wrap' }}>
+          <button onClick={onExport} style={{ ...actionBtn, display: 'inline-flex', alignItems: 'center', gap: '.4rem' }}>
+            <i className="fi fi-rr-download" /> Exporteer back-up
+          </button>
+          <button onClick={onImport} style={{ ...actionBtn, display: 'inline-flex', alignItems: 'center', gap: '.4rem' }}>
+            <i className="fi fi-rr-upload" /> Importeer back-up
+          </button>
+        </div>
+      </section>
+
+      <section>
+        <h2 style={sh}>Account</h2>
+        <button style={{ ...actionBtn, color: '#b91c1c', borderColor: '#fca5a5', display: 'inline-flex', alignItems: 'center', gap: '.4rem' }}>
+          <i className="fi fi-rr-sign-out-alt" /> Uitloggen
+        </button>
+      </section>
+    </div>
+  );
+}
+
+const settingsRow: React.CSSProperties = {
+  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+  padding: '.6rem 0', borderBottom: '1px solid var(--border)',
+};
+const settingsInput: React.CSSProperties = {
+  border: '1px solid var(--border)', borderRadius: 6, padding: '.3rem .6rem',
+  fontSize: '.9rem', background: 'var(--surface)', color: 'var(--text)',
+};
+const actionBtn: React.CSSProperties = {
+  padding: '.45rem 1rem', border: '1px solid var(--border)', borderRadius: 8,
+  background: 'var(--surface)', cursor: 'pointer', fontSize: '.9rem', color: 'var(--text)',
+};
 
 // Inline component — te klein voor eigen bestand
 function StockPanel({ ingredients, stock, onToggle }: {
@@ -193,8 +315,4 @@ const sh: React.CSSProperties = {
   letterSpacing: '.05em', color: 'var(--text-muted)', marginBottom: '.5rem',
 };
 
-const headerBtn: React.CSSProperties = {
-  padding: '.3rem .65rem', fontSize: '.8rem',
-  border: '1px solid rgba(255,255,255,.15)', borderRadius: 6,
-  background: 'rgba(255,255,255,.06)', cursor: 'pointer', color: '#8aab95',
-};
+
