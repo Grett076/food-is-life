@@ -77,6 +77,14 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
   const todayIndex = week.findIndex((d) => d.date === today);
   const [activeDayIndex, setActiveDayIndex] = useState(todayIndex >= 0 ? todayIndex : 0);
   const clampedActive = Math.min(activeDayIndex, week.length - 1);
+
+  // Active-card local state — reset when user swipes to a different day
+  const [noteValue, setNoteValue] = useState(week[clampedActive]?.note ?? '');
+  const [doneTasks, setDoneTasks] = useState<Set<number>>(new Set());
+  useEffect(() => {
+    setNoteValue(week[clampedActive]?.note ?? '');
+    setDoneTasks(new Set());
+  }, [clampedActive]);
   const weekEndStr = isoToDisplay(localDateStr(new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 6)));
 
   const weekendDays = week.filter((_, i) => i >= 5);
@@ -188,16 +196,48 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                       ` / ${formatMinutes(recipe.totalTimeMinutes)} totaal`}
                   </div>
                   {fit && <span className={`season-badge day-season ${fit}`}>{SEASON_FIT_LABEL[fit]}</span>}
-                  {day.note && (
-                    <div style={{ fontSize: '.78rem', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '.2rem', display: 'flex', alignItems: 'center', gap: '.3rem' }}>
-                      <i className="fi fi-rr-memo" style={{ fontSize: '.75rem' }} />{day.note}
-                    </div>
-                  )}
                 </>
               ) : day.note ? (
                 <div className="day-meal">{day.note}</div>
               ) : (
                 <div className="day-meal empty">Nog niets gepland</div>
+              )}
+
+              {/* Prep tasks + inline note — only for the active card */}
+              {i === clampedActive && (
+                <>
+                  {recipe?.prepTasks && recipe.prepTasks.length > 0 && (
+                    <div style={{ marginTop: '.25rem', display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
+                      <span style={{ fontSize: '.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--text-muted)' }}>Voorbereiding</span>
+                      {recipe.prepTasks.map((task, ti) => (
+                        <label key={ti} style={{ display: 'flex', alignItems: 'flex-start', gap: '.5rem', cursor: 'pointer', fontSize: '.82rem' }}>
+                          <input
+                            type="checkbox"
+                            checked={doneTasks.has(ti)}
+                            onChange={() => setDoneTasks((s) => { const n = new Set(s); n.has(ti) ? n.delete(ti) : n.add(ti); return n; })}
+                            style={{ marginTop: '.15rem', flexShrink: 0, accentColor: 'var(--accent)' }}
+                          />
+                          <span style={{ textDecoration: doneTasks.has(ti) ? 'line-through' : 'none', color: doneTasks.has(ti) ? 'var(--text-muted)' : 'var(--text)' }}>
+                            <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{task.relativeTime}</span>{' — '}{task.title}
+                            {task.note && <span style={{ color: 'var(--text-muted)' }}> ({task.note})</span>}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={{ marginTop: 'auto', paddingTop: '.75rem' }}>
+                    <input
+                      type="text"
+                      placeholder="+ Notitie (bijv. geen zout, voor gasten…)"
+                      value={noteValue}
+                      onChange={(e) => setNoteValue(e.target.value)}
+                      onBlur={() => onAssign(day.date, day.recipeId, noteValue.trim() || undefined)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+                      style={{ width: '100%', padding: '.4rem .6rem', border: '1px solid var(--border)', borderRadius: 6, fontSize: '.82rem', background: 'var(--bg)', color: 'var(--text)' }}
+                    />
+                  </div>
+                </>
               )}
 
               {effectiveLunch !== null && (
