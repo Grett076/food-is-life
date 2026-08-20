@@ -197,7 +197,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                   isCooked
                     ? <button className="cooked-badge" title="Ongedaan maken" onClick={() => onUncookMeal(day.date, recipe.id)}><i className="fi fi-rr-check" /> Gekookt</button>
                     : <button onClick={() => setCookedRecipe({ recipe, date: day.date })}>
-                        <i className="fi fi-rr-check" /> Gekookt
+                        Gekookt
                       </button>
                 )}
                 {(recipe || day.note) && (

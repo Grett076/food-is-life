@@ -82,7 +82,7 @@ export function CookedModal({ recipe, allIngredients, stock, onDeplete, onClose 
           )}
 
           <div style={{ display: 'flex', gap: '.75rem', justifyContent: 'flex-end' }}>
-            <button onClick={onClose}
+            <button onClick={() => onDeplete([])}
               style={{ padding: '.45rem 1rem', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', background: 'none', display: 'inline-flex', alignItems: 'center', gap: '.35rem' }}>
               <i className="fi fi-rr-cross-small" /> Niets op
             </button>
