@@ -2,6 +2,40 @@
 
 Weekplanner voor avondeten. Doordeweeks snel en voorspelbaar, in het weekend ruimte voor iets moois.
 
+## Git-workflow
+
+**Alle wijzigingen gaan via een branch — nooit direct op `main`.**
+
+```bash
+# Begin altijd zo:
+git checkout main
+git pull                          # zorg dat main up-to-date is
+git checkout -b feature/mijn-feature
+
+# Werk, commit tussentijds:
+git add -A
+git commit -m "Korte beschrijving"
+
+# Klaar? Merge terug naar main:
+git checkout main
+git merge --no-ff feature/mijn-feature
+git branch -d feature/mijn-feature
+```
+
+**Branchnamen:** gebruik een prefix die past bij de wijziging:
+
+| Prefix | Wanneer |
+|---|---|
+| `feature/` | Nieuwe functionaliteit |
+| `fix/` | Bugfix |
+| `docs/` | Alleen documentatie |
+| `refactor/` | Code opruimen zonder gedragswijziging |
+| `chore/` | Dependencies, config, tooling |
+
+`main` bevat altijd werkende, stabiele code.
+
+---
+
 ## Starten
 
 ```bash
