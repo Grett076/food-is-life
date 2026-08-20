@@ -96,6 +96,12 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
           <div className="modal-header">
             <h2 style={{ fontSize: '.95rem' }}>Maaltijd — {date}</h2>
             <div style={{ display: 'flex', gap: '.4rem', alignItems: 'center' }}>
+              {currentRecipeId && (
+                <button onClick={() => { onPick(null); onClose(); }}
+                  style={{ fontSize: '.78rem', padding: '.25rem .55rem', background: 'none', color: '#b91c1c', border: '1px solid #fca5a5', borderRadius: 5, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '.3rem' }}>
+                  <i className="fi fi-rr-trash" />
+                </button>
+              )}
               <button onClick={() => setShowForm(true)}
                 style={{ fontSize: '.78rem', padding: '.25rem .55rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 5, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '.3rem' }}>
                 <i className="fi fi-rr-plus" /> Recept
