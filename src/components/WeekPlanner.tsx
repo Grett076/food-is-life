@@ -184,7 +184,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
 
                   {i === clampedActive ? (
                     /* ── Active card: prominent stats ── */
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '.55rem', marginTop: '.5rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '.55rem', marginTop: '.5rem', flex: 1, justifyContent: 'center' }}>
                         <span style={{ fontSize: '.88rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '.5rem' }}>
                           <i className="fi fi-rr-stopwatch" style={{ color: 'var(--accent)', fontSize: '1rem', flexShrink: 0 }} />
                           {formatMinutes(recipe.activePrepMinutes)} actief
@@ -248,7 +248,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                     </div>
                   )}
 
-                  <div style={{ marginTop: 'auto', paddingTop: '.75rem' }}>
+                  <div style={{ paddingTop: '.75rem' }}>
                     <input
                       type="text"
                       placeholder="+ Notitie (bijv. geen zout, voor gasten…)"
