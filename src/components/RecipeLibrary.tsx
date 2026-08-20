@@ -77,6 +77,10 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
     setConfirmDeleteId(id);
   }
 
+  const [showFilters, setShowFilters] = useState(false);
+
+  const activeFilterCount = (favOnly ? 1 : 0) + styleFilters.size + (seasonFilter ? 1 : 0);
+
   return (
     <div>
       <div className="library-controls">
@@ -87,29 +91,11 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
           onChange={(e) => setSearch(e.target.value)}
         />
         <button
-          className={`filter-btn ${favOnly ? 'active' : ''}`}
-          onClick={() => setFavOnly((v) => !v)}
+          className={`filter-btn ${activeFilterCount > 0 ? 'active' : ''}`}
+          onClick={() => setShowFilters((v) => !v)}
         >
-          ★ Favorieten
+          <i className="fi fi-rr-filter" /> Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
         </button>
-        {STYLE_FILTERS.map(({ key, label }) => (
-          <button
-            key={key}
-            className={`filter-btn ${styleFilters.has(key) ? 'active' : ''}`}
-            onClick={() => toggleStyle(key)}
-          >
-            {label}
-          </button>
-        ))}
-        {SEASON_FILTERS.map(({ key, label }) => (
-          <button
-            key={key}
-            className={`filter-btn ${seasonFilter === key ? 'active' : ''}`}
-            onClick={() => setSeasonFilter((v) => (v === key ? null : key))}
-          >
-            {label}
-          </button>
-        ))}
         <button
           onClick={() => { setEditingRecipe(null); setShowForm(true); }}
           style={{ marginLeft: 'auto', padding: '.4rem .9rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 600, fontSize: '.88rem', display: 'inline-flex', alignItems: 'center', gap: '.35rem', whiteSpace: 'nowrap' }}
@@ -117,6 +103,35 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
           <i className="fi fi-rr-plus" /> Recept
         </button>
       </div>
+
+      {showFilters && (
+        <div className="library-filter-chips">
+          <button
+            className={`filter-btn ${favOnly ? 'active' : ''}`}
+            onClick={() => setFavOnly((v) => !v)}
+          >
+            ★ Favorieten
+          </button>
+          {STYLE_FILTERS.map(({ key, label }) => (
+            <button
+              key={key}
+              className={`filter-btn ${styleFilters.has(key) ? 'active' : ''}`}
+              onClick={() => toggleStyle(key)}
+            >
+              {label}
+            </button>
+          ))}
+          {SEASON_FILTERS.map(({ key, label }) => (
+            <button
+              key={key}
+              className={`filter-btn ${seasonFilter === key ? 'active' : ''}`}
+              onClick={() => setSeasonFilter((v) => (v === key ? null : key))}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <p className="text-muted" style={{ marginBottom: '.75rem' }}>
         {filtered.length} van {recipes.length} gerechten

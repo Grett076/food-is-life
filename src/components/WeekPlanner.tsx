@@ -200,11 +200,6 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                         Gekookt
                       </button>
                 )}
-                {(recipe || day.note) && (
-                  <button className="btn-danger" onClick={() => onAssign(day.date, null, undefined)}>
-                    <i className="fi fi-rr-trash" />
-                  </button>
-                )}
               </div>
             </div>
           );
