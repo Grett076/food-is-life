@@ -128,8 +128,9 @@ export function useAppState() {
     setStock((s) => Array.from(new Set([...s, ...ingredientIds])));
   }
 
-  function cookMeal(ingredientIds: string[]) {
+  function cookMeal(date: string, recipeId: string, ingredientIds: string[]) {
     setStock((s) => s.filter((id) => !ingredientIds.includes(id)));
+    setHistory((h) => [...h, { date, recipeId }]);
   }
 
   function goToCurrentWeek() {

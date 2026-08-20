@@ -44,7 +44,7 @@ interface Props {
   stock: string[];
   onAssign: (date: string, recipeId: string | null, note?: string) => void;
   onNavigate: (delta: number) => void;
-  onCookMeal: (ingredientIds: string[]) => void;
+  onCookMeal: (date: string, recipeId: string, ingredientIds: string[]) => void;
   onAddRecipe: (recipe: Recipe) => void;
   onSetLunch: (date: string, value: 'boterham' | 'skip' | null) => void;
 }
@@ -52,7 +52,7 @@ interface Props {
 export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, onAssign, onNavigate, onCookMeal, onAddRecipe, onSetLunch }: Props) {
   const [picking, setPicking] = useState<string | null>(null);
   const [detail, setDetail] = useState<Recipe | null>(null);
-  const [cookedRecipe, setCookedRecipe] = useState<Recipe | null>(null);
+  const [cookedRecipe, setCookedRecipe] = useState<{ recipe: Recipe; date: string } | null>(null);
 
   const today = localDateStr(new Date());
   const todayIndex = week.findIndex((d) => d.date === today);
@@ -140,8 +140,10 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
           const fit = recipe ? seasonFit(recipe.ingredients, ingredients, month) : null;
           const effectiveLunch = day.lunch !== undefined ? day.lunch : (isWorkday ? 'boterham' : null);
 
+          const isCooked = !!recipe && history.some((h) => h.date === day.date && h.recipeId === recipe.id);
+
           return (
-            <div key={day.date} className={`day-card${isWeekend ? ' weekend' : ''}${isToday ? ' today' : ''}${i === clampedActive ? ' mobile-active' : ''}`}>
+            <div key={day.date} className={`day-card${isWeekend ? ' weekend' : ''}${isToday ? ' today' : ''}${isCooked ? ' cooked' : ''}${i === clampedActive ? ' mobile-active' : ''}`}>
               <div>
                 <div className="day-label">
                   <span>{DAY_NL[i]}</span>
@@ -191,9 +193,11 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                   {recipe || day.note ? 'Wijzigen' : 'Plannen'}
                 </button>
                 {recipe && isPast && (
-                  <button onClick={() => setCookedRecipe(recipe)}>
-                    <i className="fi fi-rr-check" /> Gekookt
-                  </button>
+                  isCooked
+                    ? <span className="cooked-badge"><i className="fi fi-rr-check" /> Gekookt</span>
+                    : <button onClick={() => setCookedRecipe({ recipe, date: day.date })}>
+                        <i className="fi fi-rr-check" /> Gekookt
+                      </button>
                 )}
                 {(recipe || day.note) && (
                   <button className="btn-danger" onClick={() => onAssign(day.date, null, undefined)}>
@@ -235,10 +239,10 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
 
       {cookedRecipe && (
         <CookedModal
-          recipe={cookedRecipe}
+          recipe={cookedRecipe.recipe}
           allIngredients={ingredients}
           stock={stock}
-          onDeplete={(ids) => { onCookMeal(ids); setCookedRecipe(null); }}
+          onDeplete={(ids) => { onCookMeal(cookedRecipe.date, cookedRecipe.recipe.id, ids); setCookedRecipe(null); }}
           onClose={() => setCookedRecipe(null)}
         />
       )}
