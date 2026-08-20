@@ -113,6 +113,9 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
           {week.map((day, i) => {
             const num = parseInt(day.date.split('-')[2], 10);
             const hasMeal = !!(week[i].recipeId || week[i].note);
+            const isWorkday = i < 5;
+            const lunchVal = week[i].lunch !== undefined ? week[i].lunch : (isWorkday ? 'boterham' : null);
+            const hasLunch = lunchVal === 'boterham';
             return (
               <button
                 key={day.date}
@@ -126,7 +129,10 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
               >
                 <span className="strip-name">{DAY_NL[i]}</span>
                 <span className="strip-num">{num}</span>
-                <span className="strip-dot" style={{ visibility: hasMeal ? 'visible' : 'hidden' }} />
+                <span className="strip-dots">
+                  <span className="strip-dot" style={{ visibility: hasMeal ? 'visible' : 'hidden' }} />
+                  <span className="strip-dot strip-dot-lunch" style={{ visibility: hasLunch ? 'visible' : 'hidden' }} />
+                </span>
               </button>
             );
           })}
@@ -197,7 +203,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                       background: 'white', transition: 'left .2s',
                     }} />
                   </span>
-                  🥪 Boterham
+                  Lunch
                 </label>
               )}
 
