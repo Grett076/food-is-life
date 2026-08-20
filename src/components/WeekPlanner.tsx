@@ -164,6 +164,11 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                       ` / ${formatMinutes(recipe.totalTimeMinutes)} totaal`}
                   </div>
                   {fit && <span className={`season-badge day-season ${fit}`}>{SEASON_FIT_LABEL[fit]}</span>}
+                  {day.note && (
+                    <div style={{ fontSize: '.78rem', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '.2rem', display: 'flex', alignItems: 'center', gap: '.3rem' }}>
+                      <i className="fi fi-rr-memo" style={{ fontSize: '.75rem' }} />{day.note}
+                    </div>
+                  )}
                 </>
               ) : day.note ? (
                 <div className="day-meal">{day.note}</div>
@@ -191,7 +196,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
               <div className="day-actions">
                 <button className="primary" onClick={() => setPicking(day.date)}>
                   <i className={`fi ${recipe || day.note ? 'fi-rr-calendar-pen' : 'fi-rr-calendar-plus'}`} />
-                  {recipe || day.note ? 'Wijzigen' : 'Plannen'}
+                  {recipe || day.note ? 'Wijzigen' : 'Plan maaltijd'}
                 </button>
                 {recipe && isPast && (
                   isCooked
@@ -215,6 +220,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
           history={history}
           month={month}
           currentRecipeId={week.find((d) => d.date === picking)?.recipeId ?? null}
+          currentNote={week.find((d) => d.date === picking)?.note}
           preferences={preferences}
           stock={stock}
           onAddRecipe={onAddRecipe}

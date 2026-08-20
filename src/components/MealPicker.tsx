@@ -20,6 +20,7 @@ interface Props {
   history: MealHistory[];
   month: number;
   currentRecipeId: string | null;
+  currentNote?: string;
   preferences: Preferences;
   stock: string[];
   onPick: (recipeId: string | null, note?: string) => void;
@@ -27,10 +28,10 @@ interface Props {
   onClose: () => void;
 }
 
-export function MealPicker({ date, isWeekend, recipes, ingredients, history, month, currentRecipeId, preferences, stock, onPick, onAddRecipe, onClose }: Props) {
+export function MealPicker({ date, isWeekend, recipes, ingredients, history, month, currentRecipeId, currentNote, preferences, stock, onPick, onAddRecipe, onClose }: Props) {
   const [search, setSearch] = useState('');
-  const [showNote, setShowNote] = useState(false);
-  const [note, setNote] = useState('');
+  const [showNote, setShowNote] = useState(!!currentNote);
+  const [note, setNote] = useState(currentNote ?? '');
   const [showForm, setShowForm] = useState(false);
 
   const ranked = rankRecipes(recipes, history, ingredients, month, preferences, stock);
@@ -55,7 +56,7 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
     return (
       <div
         className="picker-item"
-        onClick={() => onPick(recipe.id)}
+        onClick={() => onPick(recipe.id, note.trim() || undefined)}
         style={{
           opacity: isExcluded ? .5 : 1,
           background: isCurrent ? 'var(--accent-light)' : undefined,
@@ -137,7 +138,7 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
                   {weekendChips.map((r) => (
                     <button
                       key={r.id}
-                      onClick={() => onPick(r.id)}
+                      onClick={() => onPick(r.id, note.trim() || undefined)}
                       style={{
                         padding: '.3rem .7rem', borderRadius: 20,
                         border: '1px solid var(--weekend-border)',
@@ -165,13 +166,13 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
                   onClick={() => setShowNote(true)}
                   style={{ fontSize: '.82rem', color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                 >
-                  + Notitie toevoegen (restjes, afhalen, broodjes…)
+                  + Notitie toevoegen (bijv. geen zout, restjes, afhalen…)
                 </button>
               ) : (
                 <div style={{ display: 'flex', gap: '.5rem' }}>
                   <input
                     type="text"
-                    placeholder="Restjes, afhalen, broodjes…"
+                    placeholder="Bijv. geen zout, restjes, afhalen…"
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     autoFocus
