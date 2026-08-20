@@ -114,7 +114,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
         </div>
       </div>
 
-      {projectsThisWeekend.length > 0 && (
+      {projectsThisWeekend.length > 0 && (clampedActive >= 5 || window.innerWidth > 800) && (
         <div className="weekend-banner" style={{ marginBottom: '1rem' }}>
           <h3>📋 Voorbereiding dit weekend</h3>
           {projectsThisWeekend.map((r) => (
