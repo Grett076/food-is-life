@@ -45,11 +45,12 @@ interface Props {
   onAssign: (date: string, recipeId: string | null, note?: string) => void;
   onNavigate: (delta: number) => void;
   onCookMeal: (date: string, recipeId: string, ingredientIds: string[]) => void;
+  onUncookMeal: (date: string, recipeId: string) => void;
   onAddRecipe: (recipe: Recipe) => void;
   onSetLunch: (date: string, value: 'boterham' | 'skip' | null) => void;
 }
 
-export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, onAssign, onNavigate, onCookMeal, onAddRecipe, onSetLunch }: Props) {
+export function WeekPlanner({ week, weekStart, recipes, ingredients, history, month, preferences, stock, onAssign, onNavigate, onCookMeal, onUncookMeal, onAddRecipe, onSetLunch }: Props) {
   const [picking, setPicking] = useState<string | null>(null);
   const [detail, setDetail] = useState<Recipe | null>(null);
   const [cookedRecipe, setCookedRecipe] = useState<{ recipe: Recipe; date: string } | null>(null);
@@ -194,7 +195,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                 </button>
                 {recipe && isPast && (
                   isCooked
-                    ? <span className="cooked-badge"><i className="fi fi-rr-check" /> Gekookt</span>
+                    ? <button className="cooked-badge" title="Ongedaan maken" onClick={() => onUncookMeal(day.date, recipe.id)}><i className="fi fi-rr-check" /> Gekookt</button>
                     : <button onClick={() => setCookedRecipe({ recipe, date: day.date })}>
                         <i className="fi fi-rr-check" /> Gekookt
                       </button>

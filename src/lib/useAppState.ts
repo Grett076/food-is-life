@@ -128,6 +128,10 @@ export function useAppState() {
     setStock((s) => Array.from(new Set([...s, ...ingredientIds])));
   }
 
+  function uncookMeal(date: string, recipeId: string) {
+    setHistory((h) => h.filter((e) => !(e.date === date && e.recipeId === recipeId)));
+  }
+
   function cookMeal(date: string, recipeId: string, ingredientIds: string[]) {
     setStock((s) => s.filter((id) => !ingredientIds.includes(id)));
     setHistory((h) => [...h, { date, recipeId }]);
@@ -146,7 +150,7 @@ export function useAppState() {
     updateIngredient, addIngredient,
     goToCurrentWeek,
     preferences, toggleExcluded,
-    stock, toggleStock, addToStock, cookMeal,
+    stock, toggleStock, addToStock, cookMeal, uncookMeal,
     setLunch,
   };
 }
