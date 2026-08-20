@@ -184,26 +184,24 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
 
                   {i === clampedActive ? (
                     /* ── Active card: prominent stats ── */
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem', marginTop: '.25rem' }}>
-                      <div style={{ display: 'flex', gap: '.75rem' }}>
-                        <div style={{ flex: 1, textAlign: 'center', padding: '.9rem .5rem', background: 'var(--tag-bg)', borderRadius: 10 }}>
-                          <div style={{ fontSize: '2rem', fontWeight: 700, lineHeight: 1 }}>{formatMinutes(recipe.activePrepMinutes)}</div>
-                          <div style={{ fontSize: '.68rem', textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--text-muted)', marginTop: '.3rem' }}>Actief</div>
-                        </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '.55rem', marginTop: '.5rem' }}>
+                        <span style={{ fontSize: '.88rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+                          <i className="fi fi-rr-stopwatch" style={{ color: 'var(--accent)', fontSize: '1rem', flexShrink: 0 }} />
+                          {formatMinutes(recipe.activePrepMinutes)} actief
+                        </span>
                         {recipe.totalTimeMinutes !== recipe.activePrepMinutes && (
-                          <div style={{ flex: 1, textAlign: 'center', padding: '.9rem .5rem', background: 'var(--tag-bg)', borderRadius: 10 }}>
-                            <div style={{ fontSize: '2rem', fontWeight: 700, lineHeight: 1 }}>{formatMinutes(recipe.totalTimeMinutes)}</div>
-                            <div style={{ fontSize: '.68rem', textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--text-muted)', marginTop: '.3rem' }}>Totaal</div>
-                          </div>
+                          <span style={{ fontSize: '.88rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+                            <i className="fi fi-rr-clock" style={{ color: 'var(--accent)', fontSize: '1rem', flexShrink: 0 }} />
+                            {formatMinutes(recipe.totalTimeMinutes)} totaal
+                          </span>
                         )}
-                      </div>
-                      {fit && <span className={`season-badge day-season ${fit}`} style={{ alignSelf: 'flex-start' }}>{SEASON_FIT_LABEL[fit]}</span>}
-                      {(() => {
-                        const days = daysSinceCooked(recipe.id, history);
-                        if (days === null) return <span style={{ fontSize: '.78rem', color: 'var(--text-muted)' }}><i className="fi fi-rr-calendar-xmark" style={{ marginRight: '.3rem' }} />Nog nooit gemaakt</span>;
-                        if (days === 0) return <span style={{ fontSize: '.78rem', color: 'var(--text-muted)' }}><i className="fi fi-rr-calendar-check" style={{ marginRight: '.3rem' }} />Vandaag gekookt</span>;
-                        return <span style={{ fontSize: '.78rem', color: 'var(--text-muted)' }}><i className="fi fi-rr-calendar" style={{ marginRight: '.3rem' }} />Laatst gemaakt {days === 1 ? 'gisteren' : `${days} dagen geleden`}</span>;
-                      })()}
+                        {fit && <span className={`season-badge day-season ${fit}`} style={{ alignSelf: 'flex-start' }}>{SEASON_FIT_LABEL[fit]}</span>}
+                        {(() => {
+                          const days = daysSinceCooked(recipe.id, history);
+                          if (days === null) return <span style={{ fontSize: '.88rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '.5rem' }}><i className="fi fi-rr-calendar-xmark" style={{ color: 'var(--accent)', fontSize: '1rem', flexShrink: 0 }} />Nog nooit gemaakt</span>;
+                          if (days === 0) return <span style={{ fontSize: '.88rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '.5rem' }}><i className="fi fi-rr-calendar-check" style={{ color: 'var(--accent)', fontSize: '1rem', flexShrink: 0 }} />Vandaag gekookt</span>;
+                          return <span style={{ fontSize: '.88rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '.5rem' }}><i className="fi fi-rr-calendar" style={{ color: 'var(--accent)', fontSize: '1rem', flexShrink: 0 }} />Laatst gemaakt {days === 1 ? 'gisteren' : `${days} dagen geleden`}</span>;
+                        })()}
                     </div>
                   ) : (
                     /* ── Desktop: compact as before ── */
