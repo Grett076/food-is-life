@@ -86,12 +86,6 @@ export function useAppState() {
 
   function assignMeal(date: string, recipeId: string | null, note?: string) {
     setWeek((w) => w.map((d) => (d.date === date ? { ...d, recipeId, note } : d)));
-    if (recipeId) {
-      setHistory((h) => {
-        const without = h.filter((e) => !(e.date === date && e.recipeId === recipeId));
-        return [...without, { recipeId, date }];
-      });
-    }
   }
 
   function setLunch(date: string, value: 'boterham' | 'skip' | null) {
