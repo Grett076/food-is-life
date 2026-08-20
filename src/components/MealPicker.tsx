@@ -30,7 +30,6 @@ interface Props {
 
 export function MealPicker({ date, isWeekend, recipes, ingredients, history, month, currentRecipeId, currentNote, preferences, stock, onPick, onAddRecipe, onClose }: Props) {
   const [search, setSearch] = useState('');
-  const [showNote, setShowNote] = useState(!!currentNote);
   const [note, setNote] = useState(currentNote ?? '');
   const [showForm, setShowForm] = useState(false);
 
@@ -159,35 +158,16 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
               {searchFiltered.map((r) => <PickerItem key={r.id} recipe={r} />)}
             </div>
 
-            {/* Notitie — onderaan, ingeklapt */}
+            {/* Notitie — altijd zichtbaar onderaan */}
             <div style={{ marginTop: '.85rem', paddingTop: '.75rem', borderTop: '1px solid var(--border)' }}>
-              {!showNote ? (
-                <button
-                  onClick={() => setShowNote(true)}
-                  style={{ fontSize: '.82rem', color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                >
-                  + Notitie toevoegen (bijv. geen zout, restjes, afhalen…)
-                </button>
-              ) : (
-                <div style={{ display: 'flex', gap: '.5rem' }}>
-                  <input
-                    type="text"
-                    placeholder="Bijv. geen zout, restjes, afhalen…"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    autoFocus
-                    style={{ flex: 1, padding: '.4rem .65rem', border: '1px solid var(--border)', borderRadius: 6, fontSize: '.9rem' }}
-                    onKeyDown={(e) => { if (e.key === 'Enter' && note) { onPick(null, note); onClose(); } }}
-                  />
-                  <button
-                    onClick={() => { if (note) { onPick(null, note); onClose(); } }}
-                    disabled={!note}
-                    style={{ padding: '.4rem .85rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '.9rem', display: 'inline-flex', alignItems: 'center', gap: '.35rem' }}
-                  >
-                    <i className="fi fi-rr-check" /> Opslaan
-                  </button>
-                </div>
-              )}
+              <input
+                type="text"
+                placeholder="Notitie (bijv. geen zout, restjes, afhalen…)"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                style={{ width: '100%', padding: '.4rem .65rem', border: '1px solid var(--border)', borderRadius: 6, fontSize: '.88rem', background: 'var(--bg)' }}
+                onKeyDown={(e) => { if (e.key === 'Enter' && note.trim() && !currentRecipeId) { onPick(null, note.trim()); onClose(); } }}
+              />
             </div>
 
           </div>

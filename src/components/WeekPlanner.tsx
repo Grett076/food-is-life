@@ -177,20 +177,28 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
               )}
 
               {effectiveLunch !== null && (
-                <div>
-                  <button
-                    onClick={() => onSetLunch(day.date, effectiveLunch === 'boterham' ? 'skip' : 'boterham')}
-                    title={effectiveLunch === 'boterham' ? 'Klik om over te slaan' : 'Klik voor boterham'}
-                    style={{
-                      fontSize: '.72rem', padding: '.15rem .45rem', borderRadius: 4, cursor: 'pointer', border: '1px solid',
-                      background: effectiveLunch === 'boterham' ? 'var(--weekend-bg)' : 'var(--tag-bg)',
-                      borderColor: effectiveLunch === 'boterham' ? 'var(--weekend-border)' : 'var(--border)',
-                      color: effectiveLunch === 'boterham' ? '#7a5800' : 'var(--text-muted)',
-                    }}
-                  >
-                    {effectiveLunch === 'boterham' ? '🥪 Boterham' : '🥪 —'}
-                  </button>
-                </div>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', cursor: 'pointer', fontSize: '.78rem', color: effectiveLunch === 'boterham' ? 'var(--text)' : 'var(--text-muted)' }}>
+                  <span style={{ position: 'relative', display: 'inline-block', width: '2rem', height: '1.1rem', flexShrink: 0 }}>
+                    <input
+                      type="checkbox"
+                      checked={effectiveLunch === 'boterham'}
+                      onChange={() => onSetLunch(day.date, effectiveLunch === 'boterham' ? 'skip' : 'boterham')}
+                      style={{ opacity: 0, width: 0, height: 0, position: 'absolute' }}
+                    />
+                    <span style={{
+                      position: 'absolute', inset: 0, borderRadius: '1rem', cursor: 'pointer',
+                      background: effectiveLunch === 'boterham' ? 'var(--accent)' : 'var(--border)',
+                      transition: 'background .2s',
+                    }} />
+                    <span style={{
+                      position: 'absolute', top: '.15rem',
+                      left: effectiveLunch === 'boterham' ? 'calc(100% - .95rem)' : '.15rem',
+                      width: '.8rem', height: '.8rem', borderRadius: '50%',
+                      background: 'white', transition: 'left .2s',
+                    }} />
+                  </span>
+                  🥪 Boterham
+                </label>
               )}
 
               <div className="day-actions">
