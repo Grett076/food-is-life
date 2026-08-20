@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { PlannedDay, Recipe, Ingredient, MealHistory, Preferences } from '../types';
 import { MealPicker } from './MealPicker';
 import { RecipeDetail } from './RecipeDetail';
@@ -56,6 +56,23 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
   const [cookedRecipe, setCookedRecipe] = useState<{ recipe: Recipe; date: string } | null>(null);
   const touchStartX = useRef<number | null>(null);
 
+  useEffect(() => {
+    const onStart = (e: TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+    const onEnd = (e: TouchEvent) => {
+      if (picking || detail || cookedRecipe || touchStartX.current === null) return;
+      const delta = touchStartX.current - e.changedTouches[0].clientX;
+      touchStartX.current = null;
+      if (Math.abs(delta) > 50)
+        setActiveDayIndex((i) => Math.min(6, Math.max(0, i + (delta > 0 ? 1 : -1))));
+    };
+    document.addEventListener('touchstart', onStart, { passive: true });
+    document.addEventListener('touchend', onEnd);
+    return () => {
+      document.removeEventListener('touchstart', onStart);
+      document.removeEventListener('touchend', onEnd);
+    };
+  }, [picking, detail, cookedRecipe]);
+
   const today = localDateStr(new Date());
   const todayIndex = week.findIndex((d) => d.date === today);
   const [activeDayIndex, setActiveDayIndex] = useState(todayIndex >= 0 ? todayIndex : 0);
@@ -108,15 +125,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
         </div>
       )}
 
-      <div className="week-grid"
-        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
-        onTouchEnd={(e) => {
-          if (touchStartX.current === null) return;
-          const delta = touchStartX.current - e.changedTouches[0].clientX;
-          if (Math.abs(delta) > 50) setActiveDayIndex((i) => Math.min(6, Math.max(0, i + (delta > 0 ? 1 : -1))));
-          touchStartX.current = null;
-        }}
-      >
+      <div className="week-grid">
         {/* Week strip — mobile only, rendered via CSS */}
         <div className="week-strip">
           {week.map((day, i) => {
