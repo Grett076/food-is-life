@@ -4,6 +4,7 @@ import { MealPicker } from './MealPicker';
 import { RecipeDetail } from './RecipeDetail';
 import { CookedModal } from './CookedModal';
 import { seasonFit, SEASON_FIT_LABEL } from '../lib/season';
+import { daysSinceCooked } from '../lib/history';
 
 const DAY_NL = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
 const DAY_FULL = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
@@ -180,12 +181,40 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                   <div className="day-meal" style={{ cursor: 'pointer' }} onClick={() => setDetail(recipe)}>
                     {recipe.name}
                   </div>
-                  <div className="day-meta">
-                    {formatMinutes(recipe.activePrepMinutes)} actief
-                    {recipe.totalTimeMinutes !== recipe.activePrepMinutes &&
-                      ` / ${formatMinutes(recipe.totalTimeMinutes)} totaal`}
-                  </div>
-                  {fit && <span className={`season-badge day-season ${fit}`}>{SEASON_FIT_LABEL[fit]}</span>}
+
+                  {i === clampedActive ? (
+                    /* ── Active card: prominent stats ── */
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem', marginTop: '.25rem' }}>
+                      <div style={{ display: 'flex', gap: '.75rem' }}>
+                        <div style={{ flex: 1, textAlign: 'center', padding: '.9rem .5rem', background: 'var(--tag-bg)', borderRadius: 10 }}>
+                          <div style={{ fontSize: '2rem', fontWeight: 700, lineHeight: 1 }}>{formatMinutes(recipe.activePrepMinutes)}</div>
+                          <div style={{ fontSize: '.68rem', textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--text-muted)', marginTop: '.3rem' }}>Actief</div>
+                        </div>
+                        {recipe.totalTimeMinutes !== recipe.activePrepMinutes && (
+                          <div style={{ flex: 1, textAlign: 'center', padding: '.9rem .5rem', background: 'var(--tag-bg)', borderRadius: 10 }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 700, lineHeight: 1 }}>{formatMinutes(recipe.totalTimeMinutes)}</div>
+                            <div style={{ fontSize: '.68rem', textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--text-muted)', marginTop: '.3rem' }}>Totaal</div>
+                          </div>
+                        )}
+                      </div>
+                      {fit && <span className={`season-badge day-season ${fit}`} style={{ alignSelf: 'flex-start' }}>{SEASON_FIT_LABEL[fit]}</span>}
+                      {(() => {
+                        const days = daysSinceCooked(recipe.id, history);
+                        if (days === null) return <span style={{ fontSize: '.78rem', color: 'var(--text-muted)' }}><i className="fi fi-rr-calendar-xmark" style={{ marginRight: '.3rem' }} />Nog nooit gemaakt</span>;
+                        if (days === 0) return <span style={{ fontSize: '.78rem', color: 'var(--text-muted)' }}><i className="fi fi-rr-calendar-check" style={{ marginRight: '.3rem' }} />Vandaag gekookt</span>;
+                        return <span style={{ fontSize: '.78rem', color: 'var(--text-muted)' }}><i className="fi fi-rr-calendar" style={{ marginRight: '.3rem' }} />Laatst gemaakt {days === 1 ? 'gisteren' : `${days} dagen geleden`}</span>;
+                      })()}
+                    </div>
+                  ) : (
+                    /* ── Desktop: compact as before ── */
+                    <>
+                      <div className="day-meta">
+                        {formatMinutes(recipe.activePrepMinutes)} actief
+                        {recipe.totalTimeMinutes !== recipe.activePrepMinutes && ` / ${formatMinutes(recipe.totalTimeMinutes)} totaal`}
+                      </div>
+                      {fit && <span className={`season-badge day-season ${fit}`}>{SEASON_FIT_LABEL[fit]}</span>}
+                    </>
+                  )}
                 </>
               ) : day.note ? (
                 <div className="day-meal">{day.note}</div>
