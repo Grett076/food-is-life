@@ -42,6 +42,7 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
   const [showForm, setShowForm] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
   const [detailRecipe, setDetailRecipe] = useState<Recipe | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   function toggleStyle(s: string) {
     setStyleFilters((prev) => {
@@ -73,7 +74,7 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
   }
 
   function handleDelete(id: string) {
-    if (confirm('Recept verwijderen?')) onDelete(id);
+    setConfirmDeleteId(id);
   }
 
   return (
@@ -157,6 +158,19 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
           onDelete={(id) => { setDetailRecipe(null); handleDelete(id); }}
           onClose={() => setDetailRecipe(null)}
         />
+      )}
+      {confirmDeleteId && (
+        <div className="modal-backdrop" onClick={() => setConfirmDeleteId(null)}>
+          <div className="modal" style={{ maxWidth: 320 }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-body" style={{ textAlign: 'center', padding: '1.5rem' }}>
+              <p style={{ marginBottom: '1.25rem', fontWeight: 600 }}>Recept verwijderen?</p>
+              <div style={{ display: 'flex', gap: '.75rem', justifyContent: 'center' }}>
+                <button className="btn-secondary" onClick={() => setConfirmDeleteId(null)}>Annuleren</button>
+                <button className="btn-danger" onClick={() => { onDelete(confirmDeleteId); setConfirmDeleteId(null); }}>Verwijderen</button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
