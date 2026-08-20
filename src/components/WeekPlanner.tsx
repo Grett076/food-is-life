@@ -81,6 +81,7 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
   // Active-card local state — reset when user swipes to a different day
   const [noteValue, setNoteValue] = useState(week[clampedActive]?.note ?? '');
   const [doneTasks, setDoneTasks] = useState<Set<number>>(new Set());
+  const [doneWeekendTasks, setDoneWeekendTasks] = useState<Set<string>>(new Set());
   useEffect(() => {
     setNoteValue(week[clampedActive]?.note ?? '');
     setDoneTasks(new Set());
@@ -192,18 +193,16 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                       <span style={{ fontSize: '.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '.3rem' }}>
                         <i className="fi fi-rr-clipboard-list" /> Voorbereiding
                       </span>
-                      {recipe.prepTasks.map((task, ti) => ({ task, ti }))
-                        .filter(({ ti }) => !doneTasks.has(ti))
-                        .map(({ task, ti }) => (
+                      {recipe.prepTasks.map((task, ti) => (
                           <label key={ti} style={{ display: 'flex', alignItems: 'flex-start', gap: '.5rem', cursor: 'pointer', fontSize: '.82rem' }}>
                             <input
                               type="checkbox"
-                              checked={false}
-                              onChange={() => setDoneTasks((s) => { const n = new Set(s); n.add(ti); return n; })}
+                              checked={doneTasks.has(ti)}
+                              onChange={() => setDoneTasks((s) => { const n = new Set(s); n.has(ti) ? n.delete(ti) : n.add(ti); return n; })}
                               style={{ marginTop: '.15rem', flexShrink: 0, accentColor: 'var(--accent)' }}
                             />
-                            <span>
-                              <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{task.relativeTime}</span>{' — '}{task.title}
+                            <span style={{ textDecoration: doneTasks.has(ti) ? 'line-through' : 'none', color: doneTasks.has(ti) ? 'var(--text-muted)' : 'var(--text)' }}>
+                              <span style={{ color: doneTasks.has(ti) ? 'var(--text-muted)' : 'var(--accent)', fontWeight: 600 }}>{task.relativeTime}</span>{' — '}{task.title}
                               {task.note && <span style={{ color: 'var(--text-muted)' }}> ({task.note})</span>}
                             </span>
                           </label>
@@ -273,19 +272,35 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
           <h3 style={{ display: 'flex', alignItems: 'center', gap: '.45rem' }}>
             <i className="fi fi-rr-clipboard-list" /> Voorbereiding dit weekend
           </h3>
-          {projectsThisWeekend.map((r) => (
-            <div key={r.id} style={{ marginBottom: '.5rem' }}>
-              <strong>{r.name}</strong>
-              {r.prepTasks?.map((t, i) => (
-                <div key={i} className="prep-task" style={{ marginTop: '.25rem' }}>
-                  <span className="when">{t.relativeTime}</span>
-                  {t.durationMinutes && <span className="text-muted"> · {t.durationMinutes} min</span>}
-                  {' '}{t.title}
-                  {t.note && <div className="note">{t.note}</div>}
-                </div>
-              ))}
-            </div>
-          ))}
+          {projectsThisWeekend.map((r) => {
+            const visibleTasks = (r.prepTasks ?? []).filter((_, i) => !doneWeekendTasks.has(`${r.id}-${i}`));
+            if (visibleTasks.length === 0) return null;
+            return (
+              <div key={r.id} style={{ marginBottom: '.5rem' }}>
+                <strong>{r.name}</strong>
+                {visibleTasks.map((t) => {
+                  const origIndex = (r.prepTasks ?? []).indexOf(t);
+                  const key = `${r.id}-${origIndex}`;
+                  return (
+                    <label key={key} className="prep-task" style={{ marginTop: '.25rem', display: 'flex', alignItems: 'flex-start', gap: '.5rem', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={false}
+                        onChange={() => setDoneWeekendTasks((s) => { const n = new Set(s); n.add(key); return n; })}
+                        style={{ marginTop: '.2rem', flexShrink: 0, accentColor: 'var(--accent)' }}
+                      />
+                      <span>
+                        <span className="when">{t.relativeTime}</span>
+                        {t.durationMinutes && <span className="text-muted"> · {t.durationMinutes} min</span>}
+                        {' '}{t.title}
+                        {t.note && <div className="note">{t.note}</div>}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
       )}
 
