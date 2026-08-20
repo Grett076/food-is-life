@@ -99,7 +99,7 @@ export function MealPicker({ date, isWeekend, recipes, ingredients, history, mon
               {currentRecipeId && (
                 <button onClick={() => { onPick(null); onClose(); }}
                   style={{ fontSize: '.78rem', padding: '.25rem .55rem', background: 'none', color: '#b91c1c', border: '1px solid #fca5a5', borderRadius: 5, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '.3rem' }}>
-                  <i className="fi fi-rr-trash" />
+                  <i className="fi fi-rr-trash" /> Verwijderen
                 </button>
               )}
               <button onClick={() => setShowForm(true)}
