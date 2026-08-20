@@ -155,7 +155,7 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
           history={history}
           month={month}
           onEdit={(r) => { setDetailRecipe(null); setEditingRecipe(r); }}
-          onDelete={(id) => { setDetailRecipe(null); handleDelete(id); }}
+          onDelete={(id) => { handleDelete(id); }}
           onClose={() => setDetailRecipe(null)}
         />
       )}
@@ -166,7 +166,7 @@ export function RecipeLibrary({ recipes, ingredients, history, month, onFavorite
               <p style={{ marginBottom: '1.25rem', fontWeight: 600 }}>Recept verwijderen?</p>
               <div style={{ display: 'flex', gap: '.75rem', justifyContent: 'center' }}>
                 <button className="btn-secondary" onClick={() => setConfirmDeleteId(null)}>Annuleren</button>
-                <button className="btn-danger" onClick={() => { onDelete(confirmDeleteId); setConfirmDeleteId(null); }}>Verwijderen</button>
+                <button className="btn-danger" onClick={() => { onDelete(confirmDeleteId); setConfirmDeleteId(null); setDetailRecipe(null); }}>Verwijderen</button>
               </div>
             </div>
           </div>
