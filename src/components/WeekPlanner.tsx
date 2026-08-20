@@ -114,25 +114,6 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
         </div>
       </div>
 
-      {projectsThisWeekend.length > 0 && (clampedActive >= 5 || window.innerWidth > 800) && (
-        <div className="weekend-banner" style={{ marginBottom: '1rem' }}>
-          <h3>📋 Voorbereiding dit weekend</h3>
-          {projectsThisWeekend.map((r) => (
-            <div key={r.id} style={{ marginBottom: '.5rem' }}>
-              <strong>{r.name}</strong>
-              {r.prepTasks?.map((t, i) => (
-                <div key={i} className="prep-task" style={{ marginTop: '.25rem' }}>
-                  <span className="when">{t.relativeTime}</span>
-                  {t.durationMinutes && <span className="text-muted"> · {t.durationMinutes} min</span>}
-                  {' '}{t.title}
-                  {t.note && <div className="note">{t.note}</div>}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
-
       <div className="week-grid">
         {/* Week strip — mobile only, rendered via CSS */}
         <div className="week-strip">
@@ -208,21 +189,25 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
                 <>
                   {recipe?.prepTasks && recipe.prepTasks.length > 0 && (
                     <div style={{ marginTop: '.25rem', display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
-                      <span style={{ fontSize: '.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--text-muted)' }}>Voorbereiding</span>
-                      {recipe.prepTasks.map((task, ti) => (
-                        <label key={ti} style={{ display: 'flex', alignItems: 'flex-start', gap: '.5rem', cursor: 'pointer', fontSize: '.82rem' }}>
-                          <input
-                            type="checkbox"
-                            checked={doneTasks.has(ti)}
-                            onChange={() => setDoneTasks((s) => { const n = new Set(s); n.has(ti) ? n.delete(ti) : n.add(ti); return n; })}
-                            style={{ marginTop: '.15rem', flexShrink: 0, accentColor: 'var(--accent)' }}
-                          />
-                          <span style={{ textDecoration: doneTasks.has(ti) ? 'line-through' : 'none', color: doneTasks.has(ti) ? 'var(--text-muted)' : 'var(--text)' }}>
-                            <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{task.relativeTime}</span>{' — '}{task.title}
-                            {task.note && <span style={{ color: 'var(--text-muted)' }}> ({task.note})</span>}
-                          </span>
-                        </label>
-                      ))}
+                      <span style={{ fontSize: '.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '.3rem' }}>
+                        <i className="fi fi-rr-clipboard-list" /> Voorbereiding
+                      </span>
+                      {recipe.prepTasks.map((task, ti) => ({ task, ti }))
+                        .filter(({ ti }) => !doneTasks.has(ti))
+                        .map(({ task, ti }) => (
+                          <label key={ti} style={{ display: 'flex', alignItems: 'flex-start', gap: '.5rem', cursor: 'pointer', fontSize: '.82rem' }}>
+                            <input
+                              type="checkbox"
+                              checked={false}
+                              onChange={() => setDoneTasks((s) => { const n = new Set(s); n.add(ti); return n; })}
+                              style={{ marginTop: '.15rem', flexShrink: 0, accentColor: 'var(--accent)' }}
+                            />
+                            <span>
+                              <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{task.relativeTime}</span>{' — '}{task.title}
+                              {task.note && <span style={{ color: 'var(--text-muted)' }}> ({task.note})</span>}
+                            </span>
+                          </label>
+                        ))}
                     </div>
                   )}
 
@@ -282,6 +267,27 @@ export function WeekPlanner({ week, weekStart, recipes, ingredients, history, mo
           );
         })}
       </div>
+
+      {projectsThisWeekend.length > 0 && (clampedActive >= 5 || window.innerWidth > 800) && (
+        <div className="weekend-banner" style={{ marginTop: '1rem' }}>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '.45rem' }}>
+            <i className="fi fi-rr-clipboard-list" /> Voorbereiding dit weekend
+          </h3>
+          {projectsThisWeekend.map((r) => (
+            <div key={r.id} style={{ marginBottom: '.5rem' }}>
+              <strong>{r.name}</strong>
+              {r.prepTasks?.map((t, i) => (
+                <div key={i} className="prep-task" style={{ marginTop: '.25rem' }}>
+                  <span className="when">{t.relativeTime}</span>
+                  {t.durationMinutes && <span className="text-muted"> · {t.durationMinutes} min</span>}
+                  {' '}{t.title}
+                  {t.note && <div className="note">{t.note}</div>}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
 
       {picking && (
         <MealPicker
