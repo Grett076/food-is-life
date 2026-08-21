@@ -665,3 +665,83 @@ main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; overflow
   /* Picker items — larger touch targets */
   .picker-item { min-height: 52px; padding: .65rem .75rem; }
 }
+
+/* ─── Themes ─────────────────────────────────────────────────────────────── */
+/* Each block overrides only colour tokens; structural tokens stay in :root.  */
+
+[data-theme="terracotta"] {
+  --bg: #faf6f3;
+  --border: #e0cdc6;
+  --text: #271914;
+  --text-muted: #6b5248;
+  --accent: #b85c3a;
+  --accent-hover: #9a4929;
+  --accent-light: #fceee9;
+  --accent-light-hover: #f8ddd5;
+  --weekend-bg: #fdf6ee;
+  --weekend-border: #d4a060;
+  --project-bg: #fff3e0;
+  --project-border: #c48a20;
+  --tag-bg: #f3ebe8;
+  --header-bg: #4a2318;
+  --header-text: #f0d5cb;
+  --header-nav-inactive: #c09080;
+}
+
+[data-theme="slate-amber"] {
+  --bg: #f8f9fb;
+  --border: #dde3ec;
+  --text: #1c2233;
+  --text-muted: #5a6480;
+  --accent: #c47d0e;
+  --accent-hover: #a86808;
+  --accent-light: #fef5e0;
+  --accent-light-hover: #fdeec8;
+  --weekend-bg: #fdfaf2;
+  --weekend-border: #e8b840;
+  --project-bg: #fff8e6;
+  --project-border: #d4a020;
+  --tag-bg: #edf0f5;
+  --header-bg: #1e293b;
+  --header-text: #e2e8f0;
+  --header-nav-inactive: #7a8aab;
+}
+
+[data-theme="warm-olive"] {
+  --bg: #f7f5ed;
+  --surface: #fefefe;
+  --border: #d8d4b8;
+  --text: #22200f;
+  --text-muted: #5e5a3a;
+  --accent: #6b6818;
+  --accent-hover: #565410;
+  --accent-light: #f2f0d8;
+  --accent-light-hover: #e6e3c0;
+  --weekend-bg: #fdf7e8;
+  --weekend-border: #c8a830;
+  --project-bg: #fef4d0;
+  --project-border: #b89018;
+  --tag-bg: #eeebda;
+  --header-bg: #2a2810;
+  --header-text: #e8e4c0;
+  --header-nav-inactive: #9a9668;
+}
+
+[data-theme="plum-rose"] {
+  --bg: #faf7fb;
+  --border: #ddd0e8;
+  --text: #1e1428;
+  --text-muted: #64507a;
+  --accent: #8b3a8f;
+  --accent-hover: #72307a;
+  --accent-light: #f5e8f8;
+  --accent-light-hover: #ead4f0;
+  --weekend-bg: #fdf4fb;
+  --weekend-border: #c878b8;
+  --project-bg: #fef0fb;
+  --project-border: #b058a0;
+  --tag-bg: #f0e8f5;
+  --header-bg: #2a1440;
+  --header-text: #e8d8f5;
+  --header-nav-inactive: #9a80b8;
+}
