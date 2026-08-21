@@ -51,8 +51,25 @@ export function RecipeForm({ existing, allIngredients, onSave, onClose }: Props)
     setSelectedIngIds((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
   }
 
+  function autoMatchIngredient(name: string): string | undefined {
+    const lower = name.toLowerCase();
+    const base = lower.split(',')[0].trim();
+    return allIngredients.find((ing) => {
+      const cat = ing.name.toLowerCase();
+      return base.includes(cat) || cat.includes(base);
+    })?.id;
+  }
+
   function updateRI(i: number, partial: Partial<RecipeIngredient>) {
-    setRecipeIngredients((rs) => rs.map((r, idx) => (idx === i ? { ...r, ...partial } : r)));
+    setRecipeIngredients((rs) => rs.map((r, idx) => {
+      if (idx !== i) return r;
+      const updated = { ...r, ...partial };
+      // auto-match catalogus als naam verandert; leeg als geen match
+      if ('name' in partial) {
+        updated.ingredientId = autoMatchIngredient(updated.name);
+      }
+      return updated;
+    }));
   }
 
   function updateStep(i: number, partial: Partial<RecipeStep>) {
