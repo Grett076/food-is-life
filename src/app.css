@@ -22,6 +22,10 @@ html, body { height: 100%; overflow: hidden; }
   --shadow: 0 1px 3px rgba(0,0,0,.05), 0 2px 8px rgba(0,0,0,.07);
   --shadow-md: 0 4px 16px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.05);
   --transition: 150ms ease-out;
+  /* Header / chrome */
+  --header-bg: #1a3d2b;
+  --header-text: #c8e6d4;
+  --header-nav-inactive: #8aab95;
 }
 
 body {
@@ -51,7 +55,7 @@ input, select, textarea, label { touch-action: manipulation; }
 .app { display: grid; grid-template-rows: auto 1fr; position: fixed; inset: 0; overflow: hidden; }
 
 header {
-  background: #1a3d2b;
+  background: var(--header-bg);
   border-bottom: none;
   padding: .75rem 1.5rem;
   display: flex;
@@ -59,7 +63,7 @@ header {
   gap: 1.5rem;
   position: relative;
 }
-header h1 { font-size: 1.1rem; font-weight: 700; color: #c8e6d4; letter-spacing: .01em; }
+header h1 { font-size: 1.1rem; font-weight: 700; color: var(--header-text); letter-spacing: .01em; }
 nav { display: flex; gap: .25rem; }
 nav button {
   padding: .4rem .85rem;
@@ -68,10 +72,10 @@ nav button {
   background: transparent;
   cursor: pointer;
   font-size: .9rem;
-  color: #8aab95;
+  color: var(--header-nav-inactive);
   transition: background .15s, color .15s;
 }
-nav button:hover { background: rgba(255,255,255,.1); color: #c8e6d4; }
+nav button:hover { background: rgba(255,255,255,.1); color: var(--header-text); }
 nav button.active { background: var(--accent); color: white; }
 nav button.active:hover { background: var(--accent-hover); }
 
@@ -493,7 +497,7 @@ main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; overflow
     display: flex;
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    background: #1a3d2b;
+    background: var(--header-bg);
     border-top: 1px solid rgba(255,255,255,.08);
     z-index: 200;
     padding: .35rem 0 max(.35rem, env(safe-area-inset-bottom, 0px));
@@ -517,7 +521,7 @@ main { padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; overflow
   }
   .tab-bar button .tab-icon { font-size: 1.3rem; line-height: 1; }
   .tab-bar button .tab-label { font-size: .58rem; font-weight: 500; letter-spacing: .01em; }
-  .tab-bar button.active { color: #c8e6d4; }
+  .tab-bar button.active { color: var(--header-text); }
 
   /* Week nav — same 3-col grid, smaller on mobile */
   .week-nav { gap: .3rem; margin-bottom: .75rem; }
