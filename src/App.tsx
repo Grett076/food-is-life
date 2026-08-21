@@ -1,5 +1,15 @@
 import './app.css';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+// ── Themes ──────────────────────────────────────────────────────────────────
+const THEMES = [
+  { id: 'forest',      label: 'Bos',        header: '#1a3d2b', accent: '#2d6a4f' },
+  { id: 'terracotta',  label: 'Terracotta', header: '#4a2318', accent: '#b85c3a' },
+  { id: 'slate-amber', label: 'Leisteen',   header: '#1e293b', accent: '#c47d0e' },
+  { id: 'warm-olive',  label: 'Olijf',      header: '#2a2810', accent: '#6b6818' },
+  { id: 'plum-rose',   label: 'Pruim',      header: '#2a1440', accent: '#8b3a8f' },
+] as const;
+type ThemeId = typeof THEMES[number]['id'];
 import { useAppState } from './lib/useAppState';
 import { WeekPlanner } from './components/WeekPlanner';
 import { RecipeLibrary } from './components/RecipeLibrary';
@@ -13,6 +23,17 @@ type View = 'planner' | 'library' | 'voorraad' | 'ingredients' | 'shopping' | 's
 export default function App() {
   const [view, setView] = useState<View>('planner');
   const state = useAppState();
+
+  // Theme
+  const [theme, setTheme] = useState<ThemeId>(
+    () => (localStorage.getItem('theme') as ThemeId | null) ?? 'forest'
+  );
+  useEffect(() => {
+    const el = document.documentElement;
+    if (theme === 'forest') delete el.dataset.theme;
+    else el.dataset.theme = theme;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
   const month = new Date().getMonth() + 1;
   const importRef = useRef<HTMLInputElement>(null);
   const prevView = useRef<View>('planner');
@@ -158,6 +179,8 @@ export default function App() {
 
         {view === 'settings' && (
           <SettingsPanel
+            theme={theme}
+            onSetTheme={setTheme}
             onBack={() => setView(prevView.current)}
             onExport={exportData}
             onImport={() => importRef.current?.click()}
@@ -190,7 +213,9 @@ export default function App() {
 }
 
 // ── Settings ──────────────────────────────────────────────────────────────
-function SettingsPanel({ onBack, onExport, onImport }: {
+function SettingsPanel({ theme, onSetTheme, onBack, onExport, onImport }: {
+  theme: ThemeId;
+  onSetTheme: (t: ThemeId) => void;
   onBack: () => void;
   onExport: () => void;
   onImport: () => void;
@@ -210,6 +235,42 @@ function SettingsPanel({ onBack, onExport, onImport }: {
           <div style={{ color: 'var(--text-muted)', fontSize: '.85rem' }}>Lokaal account</div>
         </div>
       </div>
+
+      <section style={{ marginBottom: '1.75rem' }}>
+        <h2 style={sh}>Thema</h2>
+        <div style={{ display: 'flex', gap: '.6rem', flexWrap: 'wrap', paddingTop: '.25rem' }}>
+          {THEMES.map((t) => {
+            const active = theme === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => onSetTheme(t.id)}
+                title={t.label}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.35rem',
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  padding: '.25rem', borderRadius: 8,
+                }}
+              >
+                <span style={{
+                  width: 44, height: 44, borderRadius: '50%',
+                  background: t.header,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: active
+                    ? `0 0 0 3px var(--surface), 0 0 0 5px ${t.accent}`
+                    : '0 1px 4px rgba(0,0,0,.18)',
+                  transition: 'box-shadow 150ms ease-out',
+                }}>
+                  <span style={{ width: 14, height: 14, borderRadius: '50%', background: t.accent, opacity: .9 }} />
+                </span>
+                <span style={{ fontSize: '.72rem', fontWeight: active ? 700 : 400, color: active ? 'var(--text)' : 'var(--text-muted)' }}>
+                  {t.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
       <section style={{ marginBottom: '1.75rem' }}>
         <h2 style={sh}>Gegevens</h2>
