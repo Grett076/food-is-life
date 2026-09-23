@@ -45,6 +45,20 @@ npm run dev
 
 Draait op http://localhost:5173. Alle data wordt lokaal opgeslagen in de browser (localStorage).
 
+### Docker
+
+```bash
+docker compose up --build
+```
+
+Open http://localhost:5173. Broncodewijzigingen worden direct door Vite verwerkt.
+
+Na wijzigingen aan `package.json` of `package-lock.json`:
+
+```bash
+docker compose exec app npm ci
+```
+
 ## Tabs
 
 ### Weekplanning
