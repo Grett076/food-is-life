@@ -1,171 +1,106 @@
-# 🍽 Food is Life
+# Food is Life
 
-Weekplanner voor avondeten. Doordeweeks snel en voorspelbaar, in het weekend ruimte voor iets moois.
+> Een lokale weekplanner voor avondeten, recepten, voorraad en boodschappen.
 
-## Git-workflow
+## What it does
 
-**Alle wijzigingen gaan via een branch — nooit direct op `main`.**
+Food is Life helpt met het plannen van maaltijden voor de week. Je beheert recepten en ingrediënten, houdt voorraad bij en maakt een boodschappenlijst op basis van de planning. De app is bedoeld voor persoonlijk gebruik en slaat alle gegevens lokaal in de browser op.
+
+## Requirements
+
+- Node.js `^20.19.0` of `>=22.12.0`
+- npm
+- Docker Engine met Docker Compose (optioneel, voor de containerworkflow)
+
+## Getting started
+
+Installeer de afhankelijkheden vanuit een uitgecheckte repository:
 
 ```bash
-# Begin altijd zo:
-git checkout main
-git pull                          # zorg dat main up-to-date is
-git checkout -b feature/mijn-feature
-
-# Werk, commit tussentijds:
-git add -A
-git commit -m "Korte beschrijving"
-
-# Klaar? Merge terug naar main:
-git checkout main
-git merge --no-ff feature/mijn-feature
-git branch -d feature/mijn-feature
+npm ci
 ```
 
-**Branchnamen:** gebruik een prefix die past bij de wijziging:
-
-| Prefix | Wanneer |
-|---|---|
-| `feature/` | Nieuwe functionaliteit |
-| `fix/` | Bugfix |
-| `docs/` | Alleen documentatie |
-| `refactor/` | Code opruimen zonder gedragswijziging |
-| `chore/` | Dependencies, config, tooling |
-
-`main` bevat altijd werkende, stabiele code.
-
----
-
-## Starten
+Start de ontwikkelserver:
 
 ```bash
-npm install
 npm run dev
 ```
 
-Draait op http://localhost:5173. Alle data wordt lokaal opgeslagen in de browser (localStorage).
+Open daarna <http://localhost:5173>.
 
 ### Docker
+
+Start de ontwikkelomgeving in een container:
 
 ```bash
 docker compose up --build
 ```
 
-Open http://localhost:5173. Broncodewijzigingen worden direct door Vite verwerkt.
+Open daarna <http://localhost:5173>. Broncodewijzigingen worden direct door Vite verwerkt.
 
-Na wijzigingen aan `package.json` of `package-lock.json`:
+Na wijzigingen aan `package.json` of `package-lock.json` vernieuw je de containerafhankelijkheden:
 
 ```bash
 docker compose exec app npm ci
 ```
 
-## Tabs
+## Usage
 
-### Weekplanning
-Overzicht van maandag t/m zondag. Klik op een dag om een maaltijd te kiezen, te wijzigen, of een notitie te zetten (restjes, afhalen).
+| Opdracht | Doel |
+| --- | --- |
+| `npm run dev` | Start de ontwikkelserver. |
+| `npm run lint` | Controleert de code met OXLint. |
+| `npm run build` | Typecheckt de app en maakt een productiebuild in `dist/`. |
+| `npm run preview` | Serveert de productiebuild lokaal. |
 
-Op zaterdag en zondag verschijnt de maaltijdkiezer met een prominente chip-rij van weekendgerechten en -projecten.
+In de app kun je:
 
-Als er een weekendproject gepland staat dat voorbereiding vereist, verschijnt een banner boven het rooster met de prep-taken en hun tijdstip.
+- maaltijden plannen voor de hele week, inclusief boterhamdagen en weekendprojecten;
+- recepten toevoegen, aanpassen, favoriet maken of uitsluiten;
+- voorraad bijhouden en een boodschappenlijst genereren;
+- recepten filteren op stijl, seizoen en favorieten;
+- gegevens exporteren als JSON-back-up en later herstellen.
 
-Op werkdagen staat een 🥪 **Boterham** knop — klik om die dag over te slaan als je toch ergens anders eet.
+Gegevens zijn browser- en apparaatspecifiek. Maak via **Instellingen** regelmatig een back-up voordat je van browser of apparaat wisselt.
 
-**🛒 Boodschappenlijst** genereert op basis van de geplande maaltijden wat je nog moet kopen, rekening houdend met je voorraad. Lunchbenodigdheden (brood, ham, kaas, komkommer) worden automatisch meegenomen op basis van het aantal boterhamdagen.
+## Architecture / How it works
 
-**✓ Gekookt** verschijnt op dagkaarten van vandaag en het verleden zodra er een recept gepland staat. Vink aan welke ingrediënten op zijn — die gaan uit je voorraad.
-
-### Recepten
-Bibliotheek met filters:
-
-- **Stijl** — Snel / Normaal / Weekend / Weekendproject
-- **Seizoen** — Nu in seizoen / Lente / Zomer / Herfst / Winter / Heel jaar
-- **Favorieten**
-
-Filters zijn combineerbaar. Klik op een recept voor de volledige beschrijving, ingrediënten met hoeveelheden en bereidingsstappen inclusief een portiewisselaar.
-
-Recepten toevoegen, bewerken en verwijderen via de bibliotheek. Toevoegen kan ook direct vanuit de maaltijdkiezer.
-
-**🚫 Niet mijn ding** — knop op elk receptkaartje. Geeft een penalty in suggesties zodat het recept lager verschijnt. Nooit geblokkeerd.
-
-### Voorraad
-Overzicht van alle ingrediënten. Klik een ingrediënt aan om het als "in huis" te markeren. Voorraad beïnvloedt de boodschappenlijst en de ranking van suggesties.
-
-### Ingrediënten
-Tabel met seizoensinformatie per ingrediënt. Aanpassen wanneer iets niet klopt voor jouw regio.
-
-## Receptcategorieën
-
-| Stijl | Bedoeling |
-|---|---|
-| **Snel** | < 30 minuten actief, weinig handelingen |
-| **Normaal** | 30–60 minuten, doordeweeks haalbaar |
-| **Weekend** | Meer tijd en aandacht, maar op één dag klaar |
-| **Weekendproject** | Lange doorlooptijd hoort erbij — actieve tijd valt mee |
-
-Weekendprojecten tonen altijd twee tijden: actieve bereidingstijd en totale doorlooptijd.
-
-## Seizoensscore
-
-- **Perfect voor nu** — ingrediënten in piekseizoen
-- **Goed voor dit seizoen** — ingrediënten in seizoen
-- **Het hele jaar** — geen seizoensgebonden ingrediënten
-- **Minder seizoensgebonden** — ingrediënten buiten hun seizoen
-
-Seizoen blokkeert nooit een keuze — het is alleen een ranking-signaal.
-
-## Maaltijdsuggesties
-
-Ranking in de maaltijdkiezer:
-
-1. Favorieten
-2. Seizoensscore
-3. Voorraad (veel in huis → hoger)
-4. Hoe recent gegeten
-5. Hoe vaak deze maand gegeten
-6. "Niet mijn ding" → onderaan
-
-## Backup & herstel
-
-In de header: **↓ Backup** en **↑ Herstel**. Backup downloadt alle data als JSON. Herstel laadt een eerder bestand terug.
-
-localStorage is browser- en apparaatspecifiek — maak regelmatig een backup.
-
-## Seed data bijwerken
-
-Verhoog `DATA_VERSION` in `src/lib/useAppState.ts` bij wijzigingen in seed-recepten of ingrediënten. Eigen data, planning en geschiedenis blijven bewaard.
-
-## Mapstructuur
-
-```
-src/
-  types.ts                  Datamodellen
-  app.css                   Stijlen (forest green palet, responsive)
-  data/
-    recipes.ts              Seed-recepten (~50 stuks)
-    ingredients.ts          Seed-ingrediënten met seizoendata
-  lib/
-    season.ts               Seizoenslogica en scoring
-    history.ts              Kookhistorie helpers
-    suggestions.ts          Ranking van suggesties
-    scale.ts                Portiewisselaar (hoeveelheden schalen)
-    backup.ts               Export / import
-    useAppState.ts          Centrale state met localStorage
-  components/
-    WeekPlanner.tsx         Weekrooster
-    MealPicker.tsx          Maaltijdkiezer modal
-    CookedModal.tsx         Ingrediënten afstrepen na koken
-    ShoppingList.tsx        Boodschappenlijst
-    RecipeLibrary.tsx       Bibliotheek met filters
-    RecipeCard.tsx          Receptkaartje
-    RecipeDetail.tsx        Receptdetail met portiewisselaar
-    RecipeForm.tsx          Toevoegen / bewerken
-    IngredientEditor.tsx    Seizoendata editor
+```text
+index.html → src/main.tsx → App → useAppState → browser localStorage
 ```
 
-## Techniek
+De app is een React- en TypeScript-single-page-app, gebouwd met Vite. Er is geen backend, database of externe API. Recepten en seizoensgegevens starten vanuit `src/data/`; `src/lib/useAppState.ts` beheert de lokale applicatiestatus. `public/sw.js` verzorgt offline fallback via een service worker.
 
-- React + TypeScript, gebouwd met Vite
-- Geen backend, geen externe API's
-- Persistentie via `localStorage`
-- Geen UI-framework, plain CSS
-- Tijdzone-veilig: datums worden lokaal opgeslagen (niet UTC)
+Verhoog `DATA_VERSION` in `src/lib/useAppState.ts` wanneer seed-recepten of -ingrediënten veranderen. Eigen gegevens, planning en kookgeschiedenis blijven behouden.
+
+## Contributing
+
+Werk nooit direct op `main`. Maak een branch met een passend prefix:
+
+- `feature/` voor functionaliteit;
+- `fix/` voor bugfixes;
+- `docs/` voor documentatie;
+- `refactor/` voor interne opschoning;
+- `chore/` voor tooling of dependencies.
+
+```bash
+git checkout main
+git pull
+git checkout -b feature/korte-omschrijving
+```
+
+Controleer de wijziging vóór je commit:
+
+```bash
+npm run lint
+npm run build
+```
+
+Commit kleine, samenhangende wijzigingen:
+
+```bash
+git add -A
+git commit -m "feat: korte omschrijving"
+```
+
+Push de branch en open een pull request naar `main` als de repository een remote reviewflow gebruikt. `main` moet altijd stabiel en werkend blijven.
