@@ -14,9 +14,11 @@ Food is Life helpt met het plannen van maaltijden voor de week. Je beheert recep
 
 ## Getting started
 
-Installeer de afhankelijkheden vanuit een uitgecheckte repository:
+Clone de repository en installeer de afhankelijkheden:
 
 ```bash
+git clone git@github.com:Grett076/food-is-life.git
+cd food-is-life
 npm ci
 ```
 
@@ -36,9 +38,9 @@ Start de ontwikkelomgeving in een container:
 docker compose up --build
 ```
 
-Open daarna <http://localhost:5173>. Broncodewijzigingen worden direct door Vite verwerkt.
+Open <http://localhost:5173>. Broncodewijzigingen worden direct verwerkt.
 
-Na wijzigingen aan `package.json` of `package-lock.json` vernieuw je de containerafhankelijkheden:
+Vernieuw containerafhankelijkheden na wijzigingen aan `package.json` of `package-lock.json`:
 
 ```bash
 docker compose exec app npm ci
@@ -69,7 +71,7 @@ Gegevens zijn browser- en apparaatspecifiek. Maak via **Instellingen** regelmati
 index.html → src/main.tsx → App → useAppState → browser localStorage
 ```
 
-De app is een React- en TypeScript-single-page-app, gebouwd met Vite. Er is geen backend, database of externe API. Recepten en seizoensgegevens starten vanuit `src/data/`; `src/lib/useAppState.ts` beheert de lokale applicatiestatus. `public/sw.js` verzorgt offline fallback via een service worker.
+De app is een React- en TypeScript-single-page-app, gebouwd met Vite. Er is geen backend, database of externe API. Seed-recepten en -ingrediënten staan in `src/data/`; `src/lib/useAppState.ts` beheert de lokale applicatiestatus. `public/sw.js` registreert een service worker voor offline fallback.
 
 Verhoog `DATA_VERSION` in `src/lib/useAppState.ts` wanneer seed-recepten of -ingrediënten veranderen. Eigen gegevens, planning en kookgeschiedenis blijven behouden.
 
@@ -103,4 +105,4 @@ git add -A
 git commit -m "feat: korte omschrijving"
 ```
 
-Push de branch en open een pull request naar `main` als de repository een remote reviewflow gebruikt. `main` moet altijd stabiel en werkend blijven.
+Push je branch en open een pull request naar `main`.
