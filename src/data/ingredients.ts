@@ -1,4 +1,4 @@
-import type { Ingredient } from '../types';
+import type { Ingredient } from '../types.js';
 
 export const INGREDIENTS: Ingredient[] = [
   // Groenten — seizoensgebonden
@@ -80,3 +80,4 @@ export const INGREDIENTS: Ingredient[] = [
   { id: 'cucumber',         name: 'Komkommer', seasonStartMonth: 5, seasonEndMonth: 9, peakMonths: [6, 7, 8] },
   { id: 'ham',              name: 'Ham' },
 ];
+

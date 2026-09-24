@@ -1,11 +1,15 @@
 services:
-  app:
+  food-is-life:
     build: .
+    container_name: food-is-life
     ports:
-      - "5173:5173"
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      DATA_DIR: /app/data
+      STATIC_DIR: /app/dist
     volumes:
-      - .:/app
-      - node_modules:/app/node_modules
+      - /mnt/user/appdata/food-is-life/data:/app/data
+    restart: unless-stopped
 
-volumes:
-  node_modules:
+

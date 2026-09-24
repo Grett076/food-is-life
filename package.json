@@ -4,9 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "npm run build && npm run start",
+    "dev:client": "vite",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
+    "test": "tsc -p tsconfig.server.json && node --test dist-server/server/store.test.js",
+    "lint": "oxlint src server",
+    "start": "node dist-server/server/index.js",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -24,3 +27,4 @@
     "vite": "^8.2.0"
   }
 }
+

@@ -23,6 +23,7 @@ type View = 'planner' | 'library' | 'voorraad' | 'ingredients' | 'shopping' | 's
 export default function App() {
   const [view, setView] = useState<View>('planner');
   const state = useAppState();
+  const migrationPrompted = useRef(false);
 
   // Theme
   const [theme, setTheme] = useState<ThemeId>(
@@ -34,6 +35,13 @@ export default function App() {
     else el.dataset.theme = theme;
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    if (!state.ready || state.serverImported || !state.hasLegacyData || migrationPrompted.current) return;
+    migrationPrompted.current = true;
+    if (!window.confirm('Bestaande gegevens uit deze browser gevonden. Eenmalig naar de centrale opslag overzetten?')) return;
+    void state.importOldBrowserData().catch(() => alert('De eenmalige import is mislukt. Je browsergegevens zijn niet verwijderd.'));
+  }, [state.ready, state.serverImported, state.hasLegacyData]);
   const month = new Date().getMonth() + 1;
   const importRef = useRef<HTMLInputElement>(null);
   const prevView = useRef<View>('planner');
@@ -48,9 +56,17 @@ export default function App() {
     if (!file) return;
     try {
       await importData(file);
-      window.location.reload();
-    } catch {
-      alert('Import mislukt — controleer het bestand.');
+      await state.refresh();
+    } catch (cause) {
+      alert(cause instanceof Error ? cause.message : 'Import mislukt — controleer het bestand.');
+    }
+  }
+
+  async function handleExport() {
+    try {
+      await exportData();
+    } catch (cause) {
+      alert(cause instanceof Error ? cause.message : 'Export mislukt.');
     }
   }
 
@@ -97,6 +113,11 @@ export default function App() {
       </header>
 
       <main>
+        {state.error && (
+          <p role="alert" style={{ margin: '0 0 1rem', padding: '.75rem 1rem', borderRadius: 8, background: '#fff1f2', color: '#9f1239' }}>
+            Centrale opslag: {state.error}
+          </p>
+        )}
         {view === 'planner' && (
           <WeekPlanner
             week={state.week}
@@ -182,7 +203,7 @@ export default function App() {
             theme={theme}
             onSetTheme={setTheme}
             onBack={() => setView(prevView.current)}
-            onExport={exportData}
+            onExport={handleExport}
             onImport={() => importRef.current?.click()}
           />
         )}

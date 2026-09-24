@@ -1,4 +1,4 @@
-import type { Recipe } from '../types';
+import type { Recipe } from '../types.js';
 
 export const RECIPES: Recipe[] = [
 
@@ -1789,3 +1789,4 @@ export const RECIPES: Recipe[] = [
   },
 
 ];
+
